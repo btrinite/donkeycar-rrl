@@ -441,7 +441,8 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
             needed_adjustment = self.cfg.ROBOCARS_LOCALIZER_STEERING_ADJUST_STEPS[abs(loc-requested_lane)]
             if (loc-requested_lane)>0:
                 needed_adjustment = - needed_adjustment
-            angle=angle+needed_adjustment
+            mylogger.info(f"LaneCtrl current lane:{loc}, requested lane: {requested_lane}, adjust steering by {needed_adjustment}")      
+            self.angle=angle+needed_adjustment
 
     def update(self):
         # not implemented
