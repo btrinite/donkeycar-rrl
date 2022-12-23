@@ -101,7 +101,7 @@ class RobocarsHatInCtrl:
         elif feature == 'output_steering_exp':
             return self.AUX_FEATURE_OUTPUT_STEERING_EXP
         elif feature == 'lane_annotation':
-            return self.AUX_FEATURE_LANE_ANNOTAtiON
+            return self.AUX_FEATURE_LANE_ANNOTATION
         elif feature != None:
             mylogger.info(f"CtrlIn : Unkown requested feature : {feature}")
 
