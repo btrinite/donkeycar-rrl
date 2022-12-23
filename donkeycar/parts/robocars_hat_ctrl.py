@@ -303,7 +303,7 @@ class RobocarsHatInCtrl:
         if (self.mode=='user' and self.cfg.ROBOCARSHAT_THROTTLE_DISCRET != None) :
             inds = np.digitize(user_throttle, self.discretesThrottle)
             inds = max(inds,1)
-            inds = min(inds, len(cfg.ROBOCARSHAT_THROTTLE_DISCRET))
+            inds = min(inds, len(self.cfg.ROBOCARSHAT_THROTTLE_DISCRET))
             user_throttle = self.cfg.ROBOCARSHAT_THROTTLE_DISCRET[inds-1]
 
         if self.cfg.ROBOCARSHAT_AUTORECORD_ON_THROTTLE and user_throttle>0.05:
