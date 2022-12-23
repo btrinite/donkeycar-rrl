@@ -352,12 +352,13 @@ class RobocarsHatInCtrl(metaclass=Singleton):
             if s > 0:
                 time.sleep(s)
 
-    def run_threaded(self):
+    def run_threaded(self, throttle, angle, mode):
         user_throttle, user_steering = self.processAltModes ()
         return user_steering, user_throttle, self.mode, self.recording, self.lane
 
-    def run (self):
+    def run (self, throttle, angle, mode):
         self.processCommand()
+        self.mode = mode # Passthrough mode if needed
         user_throttle, user_steering = self.processAltModes ()
         return user_steering, user_throttle, self.mode, self.recording, self.lane
     

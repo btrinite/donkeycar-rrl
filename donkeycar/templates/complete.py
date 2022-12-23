@@ -669,10 +669,11 @@ def add_user_controller(V, cfg, use_joystick, input_image='cam/image_array'):
     if cfg.USE_ROBOCARSHAT_AS_CONTROLLER:
         from donkeycar.parts.robocars_hat_ctrl import RobocarsHatInCtrl
         ctr = RobocarsHatInCtrl(cfg)
+        inputs=['user/angle', 'user/throttle', 'user/mode'],
         outputs=['user/angle', 'user/throttle', 'user/mode', 'recording']
         if (cfg.TRAIN_LOCALIZER):
             outputs += ['localizer/location']
-        V.add(ctr, outputs=outputs,threaded=False)
+        V.add(ctr, inputs=inputs, outputs=outputs,threaded=False)
 
     return ctr
 
