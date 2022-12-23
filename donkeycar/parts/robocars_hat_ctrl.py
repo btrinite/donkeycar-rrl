@@ -120,7 +120,7 @@ class RobocarsHatInCtrl:
         self.lastAux2 = -1.0
         self.recording=False
         self.mode = 'user'
-        self.lane = 1
+        self.lane = 0
         self.lastMode = self.mode
         self.applyBrake = 0
 
@@ -130,8 +130,6 @@ class RobocarsHatInCtrl:
         else:
             self.inThrottleIdle = 1500
             self.inSteeringIdle = 1500
-
-        self.inSpeed = 0
 
         #Aux feature
         self.aux1Feature = self.AUX_FEATURE_NONE
@@ -286,11 +284,11 @@ class RobocarsHatInCtrl:
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_LANE_ANNOTATION)
         if command != None and has_changed:
             if command < -0.5:
-                self.lane = 0
+                self.lane = -1
             elif command > 0.5:
-                self.lane = 2
+                self.lane = 1
             else:
-                self.lane = 1 
+                self.lane = 0 
             mylogger.info(f"CtrlIn Lane set to {self.lane}")
 
         # Process other features 
@@ -333,12 +331,12 @@ class RobocarsHatInCtrl:
 
     def run_threaded(self):
         user_throttle, user_steering = self.processAltModes ()
-        return user_steering, user_throttle, self.mode, self.recording, self.inSpeed
+        return user_steering, user_throttle, self.mode, self.recording, self.lane
 
     def run (self):
         self.processCommand()
         user_throttle, user_steering = self.processAltModes ()
-        return user_steering, user_throttle, self.mode, self.recording, self.inSpeed
+        return user_steering, user_throttle, self.mode, self.recording, self.lane
     
 
     def shutdown(self):

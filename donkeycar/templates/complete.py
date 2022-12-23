@@ -553,6 +553,10 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
         types += ['float', 'float', 'float']
         V.add(mon, inputs=[], outputs=perfmon_outputs, threaded=True)
 
+    if (cfg.TRAIN_LOCALIZER):
+        inputs += 'localizer/location'
+        types += ['float']
+
     # do we want to store new records into own dir or append to existing
     tub_path = TubHandler(path=cfg.DATA_PATH).create_tub_path() if \
         cfg.AUTO_CREATE_NEW_TUB else cfg.DATA_PATH
@@ -665,7 +669,10 @@ def add_user_controller(V, cfg, use_joystick, input_image='cam/image_array'):
     if cfg.USE_ROBOCARSHAT_AS_CONTROLLER:
         from donkeycar.parts.robocars_hat_ctrl import RobocarsHatInCtrl
         ctr = RobocarsHatInCtrl(cfg)
-        V.add(ctr, outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],threaded=False)
+        outputs=['user/angle', 'user/throttle', 'user/mode', 'recording']
+        if (cfg.TRAIN_LOCALIZER):
+            outputs += 'localizer/location'
+        V.add(ctr, outputs=outputs,threaded=False)
 
     return ctr
 
