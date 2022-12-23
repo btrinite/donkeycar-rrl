@@ -554,7 +554,7 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
         V.add(mon, inputs=[], outputs=perfmon_outputs, threaded=True)
 
     if (cfg.TRAIN_LOCALIZER):
-        inputs += 'localizer/location'
+        inputs += ['localizer/location']
         types += ['float']
 
     # do we want to store new records into own dir or append to existing
