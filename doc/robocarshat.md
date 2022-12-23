@@ -70,8 +70,8 @@ THROTTLE_BRAKE_REV_FILTER = False
 ```
 - Special features controled by Aux1 and Aux2  (Ch3, Ch4, depends on wiring) :
 ```
-ROBOCARSHAT_CH3_FEATURE = 'record/pilot'
-ROBOCARSHAT_CH4_FEATURE = 'none' 
+ROBOCARSHAT_AUX1_FEATURE = 'record/pilot'
+ROBOCARSHAT_AUX2_FEATURE = 'none' 
 ```
 - Throttle and Steering exploration increment (throttle_exploration and steering_exploration feature) :
 ```

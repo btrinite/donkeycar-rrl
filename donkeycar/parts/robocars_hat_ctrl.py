@@ -210,7 +210,7 @@ class RobocarsHatInCtrl:
         elif self.aux2Feature == feature:
             return self.inAux2, abs(self.lastAux2 - self.inAux2)>0.5
         else:
-            return None
+            return None,None
 
     def processAltModes(self):
         self.recording=False
@@ -219,7 +219,7 @@ class RobocarsHatInCtrl:
         user_steering = self.inSteering
 
         #Process features controlled by aux channels
-        command = self.getAuxValuePerFeat(self.AUX_FEATURE_RECORDandPILOT)
+        command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_RECORDandPILOT)
         if command != None :
             if (command<-0.5):
                 self.recording=True
@@ -227,12 +227,12 @@ class RobocarsHatInCtrl:
                 self.mode=self.cfg.ROBOCARSHAT_PILOT_MODE
                 user_throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
 
-        command = self.getAuxValuePerFeat(self.AUX_FEATURE_RECORD)
+        command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_RECORD)
         if command != None :
             if command > 0.5:
                 self.recording=True
 
-        command = self.getAuxValuePerFeat(self.AUX_FEATURE_PILOT)
+        command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_PILOT)
         if command != None :
             if command > 0.5:
                 self.mode='local_angle'

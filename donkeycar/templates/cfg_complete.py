@@ -524,7 +524,7 @@ ROBOCARSHAT_BRAKE_ON_IDLE_THROTTLE = -0.2
 
 THROTTLE_BRAKE_REV_FILTER = False # ESC is configured in Fw/Rv mode (no braking)
 
-#ROBOCARSHAT_CH3_FEATURE and ROBOCARSHAT_CH4_FEATURE controls the feature attached to radio ch3 and ch4
+#ROBOCARSHAT_AUX1_FEATURE and ROBOCARSHAT_AUX2_FEATURE controls the feature attached to radio ch3 and ch4
 # 'none' means aux ch is not used 
 # 'record/pilot' means aux ch is used to control either data recording (lower position), either to enable pilot mode (upper position)
 # 'record' means aux ch is used to control data recording 
