@@ -83,7 +83,7 @@ class RobocarsHatInCtrl:
     AUX_FEATURE_STEERINGEXP=5
     AUX_FEATURE_OUTPUT_STEERING_TRIM=6
     AUX_FEATURE_OUTPUT_STEERING_EXP=7
-    AUX_FEATURE_OLANE_ANNOTATION=8
+    AUX_FEATURE_LANE_ANNOTATION=8
 
     def _map_aux_feature (self, feature):
         if feature == 'record/pilot':
