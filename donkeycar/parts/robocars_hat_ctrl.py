@@ -426,10 +426,10 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
         self.lane = 0
         self.on = True
 
-    def processLane(self,steering, throttle, mode, loc):
+    def processLane(self,throttle, angle, mode, loc):
 
         self.throttle = throttle
-        self.steering = steering
+        self.angle = angle
         requested_lane = self.hatInCtrl.getRequestedLane()
         if mode != 'user':
             print (loc)
@@ -438,13 +438,13 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
         # not implemented
         pass
 
-    def run_threaded(self, steering, throttle, mode, loc):
+    def run_threaded(self, throttle, angle, mode, loc):
         # not implemented
         pass
 
-    def run (self, steering, throttle, mode, loc):
-        self.processLane (steering, throttle, mode, loc)
-        return self.steering, self.throttle
+    def run (self,throttle, angle, mode, loc):
+        self.processLane (throttle, angle, mode, loc)
+        return self.throttle, self.angle
     
 
     def shutdown(self):

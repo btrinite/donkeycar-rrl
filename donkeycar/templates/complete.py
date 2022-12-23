@@ -1057,7 +1057,7 @@ def add_drivetrain(V, cfg):
             if cfg.TRAIN_LOCALIZER:
                 from donkeycar.parts.actuator import RobocarsHatLaneCtrl
                 lane_controller = RobocarsHatLaneCtrl(cfg)
-                V.add(lane_controller, inputs=['throttle','angle','user/mode','pilot/loc'], threaded=False)
+                V.add(lane_controller, inputs=['throttle','angle','user/mode','pilot/loc'], outputs=['throttle','angle'], threaded=False)
 
             from donkeycar.parts.actuator import RobocarsHat
             train_controller = RobocarsHat(cfg)
