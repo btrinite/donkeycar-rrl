@@ -102,8 +102,8 @@ class RobocarsHatInCtrl:
             return self.AUX_FEATURE_OUTPUT_STEERING_EXP
         elif feature == 'lane_annotation':
             return self.AUX_FEATURE_LANE_ANNOTAtiON
-        else:
-            mylogger.info(f"CtrlIn : Unkown feature requested {feature}")
+        elif feature != None:
+            mylogger.info(f"CtrlIn : Unkown requested feature : {feature}")
 
     def __init__(self, cfg):
 
