@@ -295,6 +295,9 @@ class RobocarsHatInCtrl:
         if self.cfg.ROBOCARSHAT_STEERING_FIX != None:
             user_steering = self.cfg.ROBOCARSHAT_STEERING_FIX
 
+        if self.cfg.ROBOCARSHAT_AUTORECORD_ON_THROTTLE:
+                self.recording=True
+                
         if (self.mode=='user' and self.cfg.ROBOCARSHAT_THROTTLE_FLANGER != None) :
             user_throttle = dualMap(user_throttle,
                 -1, 0, 1,
