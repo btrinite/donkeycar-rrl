@@ -671,7 +671,7 @@ def add_user_controller(V, cfg, use_joystick, input_image='cam/image_array'):
         ctr = RobocarsHatInCtrl(cfg)
         outputs=['user/angle', 'user/throttle', 'user/mode', 'recording']
         if (cfg.TRAIN_LOCALIZER):
-            outputs += 'localizer/location'
+            outputs += ['localizer/location']
         V.add(ctr, outputs=outputs,threaded=False)
 
     return ctr
