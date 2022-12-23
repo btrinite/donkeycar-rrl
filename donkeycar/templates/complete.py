@@ -850,7 +850,7 @@ def add_imu(V, cfg):
 def add_drivetrain(V, cfg):
 
     if cfg.TRAIN_LOCALIZER and cfg.ROBOCARS_DRIVE_ON_LANE:
-        from donkeycar.parts.actuator import RobocarsHatLaneCtrl
+        from donkeycar.parts.robocars_hat_ctrl import RobocarsHatLaneCtrl
         lane_controller = RobocarsHatLaneCtrl(cfg)
         V.add(lane_controller, inputs=['throttle','angle','user/mode','pilot/loc'], outputs=['throttle','angle'], threaded=False)
 
