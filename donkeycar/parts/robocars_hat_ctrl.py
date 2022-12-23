@@ -144,7 +144,7 @@ class RobocarsHatInCtrl:
             self.fixOutputSteering = 1500
 
         if self.cfg.ROBOCARSHAT_THROTTLE_DISCRET != None:
-            self.discretesThrottle = np.arange(0.0,1.0001,1.0/len(self.cfg.ROBOCARSHAT_THROTTLE_DISCRET))
+            self.discretesThrottle = np.arange(0.0,1.0001,1.0/(len(self.cfg.ROBOCARSHAT_THROTTLE_DISCRET)-1))
             mylogger.info("CtrlIn Discrete throttle thresholds set to {}".format(self.discretesThrottle))
 
         self.hatInMsg = RobocarsHatIn(self.cfg)
@@ -295,9 +295,6 @@ class RobocarsHatInCtrl:
         if self.cfg.ROBOCARSHAT_STEERING_FIX != None:
             user_steering = self.cfg.ROBOCARSHAT_STEERING_FIX
 
-        if self.cfg.ROBOCARSHAT_AUTORECORD_ON_THROTTLE:
-                self.recording=True
-                
         if (self.mode=='user' and self.cfg.ROBOCARSHAT_THROTTLE_FLANGER != None) :
             user_throttle = dualMap(user_throttle,
                 -1, 0, 1,
@@ -307,6 +304,9 @@ class RobocarsHatInCtrl:
             inds = np.digitize(user_throttle, self.discretesThrottle)
             inds = max(inds,1)
             user_throttle = self.cfg.ROBOCARSHAT_THROTTLE_DISCRET[inds-1]
+
+        if self.cfg.ROBOCARSHAT_AUTORECORD_ON_THROTTLE and user_throttle>0.05:
+                self.recording=True
 
         #if switching back to user, then apply brake
         if self.mode=='user' and self.lastMode != 'user' and self.cfg.ROBOCARSHAT_BRAKE_ON_IDLE_THROTTLE !=None:
