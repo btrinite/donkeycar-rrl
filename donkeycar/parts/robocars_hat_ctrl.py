@@ -283,7 +283,7 @@ class RobocarsHatInCtrl:
                     mylogger.info("CtrlIn Fixed output steering set to {}".format(self.fixOutputSteering))
                 self.hatActuator.setFixSteering (self.fixOutputSteering)            
 
-        command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_OLANE_ANNOTATION)
+        command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_LANE_ANNOTATION)
         if command != None and has_changed:
             if command < -0.5:
                 self.lane = 0
