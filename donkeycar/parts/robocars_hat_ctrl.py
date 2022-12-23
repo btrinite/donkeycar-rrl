@@ -74,7 +74,7 @@ class RobocarsHatIn(metaclass=Singleton):
         self.getCommand()
         return self.last_calibration_msg
 
-class RobocarsHatInCtrl:
+class RobocarsHatInCtrl(metaclass=Singleton):
     AUX_FEATURE_NONE=0
     AUX_FEATURE_RECORDandPILOT=1
     AUX_FEATURE_RECORD=2
@@ -84,6 +84,7 @@ class RobocarsHatInCtrl:
     AUX_FEATURE_OUTPUT_STEERING_TRIM=6
     AUX_FEATURE_OUTPUT_STEERING_EXP=7
     AUX_FEATURE_LANE_ANNOTATION=8
+    AUX_FEATURE_DRIVE_ON_LANE=9
 
     def _map_aux_feature (self, feature):
         if feature == 'record/pilot':
@@ -102,6 +103,8 @@ class RobocarsHatInCtrl:
             return self.AUX_FEATURE_OUTPUT_STEERING_EXP
         elif feature == 'lane_annotation':
             return self.AUX_FEATURE_LANE_ANNOTATION
+        elif feature == 'drive_on_lane':
+            return self.AUX_FEATURE_DRIVE_ON_LANE
         elif feature != None:
             mylogger.info(f"CtrlIn : Unkown requested feature : {feature}")
 
@@ -121,6 +124,7 @@ class RobocarsHatInCtrl:
         self.recording=False
         self.mode = 'user'
         self.lane = 0
+        self.requested_lane = 0
         self.lastMode = self.mode
         self.applyBrake = 0
 
@@ -150,6 +154,9 @@ class RobocarsHatInCtrl:
         self.hatInMsg = RobocarsHatIn(self.cfg)
         self.hatActuator = RobocarsHat(self.cfg)
         self.on = True
+
+    def getRequestedLane(self):
+        return self.requested_lane
 
     def processRxCh(self):
         rxch_msg = self.hatInMsg.getRxCh()
@@ -284,12 +291,22 @@ class RobocarsHatInCtrl:
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_LANE_ANNOTATION)
         if command != None and has_changed:
             if command < -0.5:
-                self.lane = -1
+                self.lane = 0
             elif command > 0.5:
-                self.lane = 1
+                self.lane = 2
             else:
-                self.lane = 0 
+                self.lane = 1 
             mylogger.info(f"CtrlIn Lane set to {self.lane}")
+
+        command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_DRIVE_ON_LANE)
+        if command != None and has_changed:
+            if command < -0.5:
+                self.requested_lane = 0
+            elif command > 0.5:
+                self.requested_lane = 2
+            else:
+                self.requested_lane = 1 
+            mylogger.info(f"CtrlIn Requested Lane set to {self.lane}")
 
         # Process other features 
         if self.cfg.ROBOCARSHAT_STEERING_FIX != None:
@@ -398,5 +415,41 @@ class RobocarsHatInOdom:
 
 #class RobocarsHatInBattery:
 
+class RobocarsHatLaneCtrl(metaclass=Singleton):
+
+    def __init__(self, cfg):
+
+        self.cfg = cfg
+        self.hatInCtrl = RobocarsHatInCtrl(self.cfg)
+        self.throttle = 0
+        self.steering = 0
+        self.lane = 0
+
+    def processLane(self,steering, throttle, mode, loc):
+
+        self.throttle = throttle
+        self.steering = steering
+        requested_lane = self.hatInCtrl.getRequestedLane()
+        if mode != 'user':
+            print (loc)
+
+    def update(self):
+        # not implemented
+        pass
+
+    def run_threaded(self, steering, throttle, mode, loc):
+        # not implemented
+        pass
+
+    def run (self, steering, throttle, mode, loc):
+        self.processLane (steering, throttle, mode, loc)
+        return self.steering, self.throttle
+    
+
+    def shutdown(self):
+        # indicate that the thread should be stopped
+        self.on = False
+        print('stopping Robocars Hat Controller')
+        time.sleep(.5)
 
 

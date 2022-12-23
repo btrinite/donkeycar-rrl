@@ -555,7 +555,7 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
 
     if (cfg.TRAIN_LOCALIZER):
         inputs += ['localizer/location']
-        types += ['float']
+        types += ['int']
 
     # do we want to store new records into own dir or append to existing
     tub_path = TubHandler(path=cfg.DATA_PATH).create_tub_path() if \
@@ -1054,9 +1054,17 @@ def add_drivetrain(V, cfg):
                         )
             V.add(vesc, inputs=['angle', 'throttle'])
         elif cfg.DRIVE_TRAIN_TYPE == "ROBOCARSHAT":
+            if cfg.TRAIN_LOCALIZER:
+                from donkeycar.parts.actuator import RobocarsHatLaneCtrl
+                lane_controller = RobocarsHatLaneCtrl(cfg)
+                V.add(lane_controller, inputs=['throttle','angle','user/mode','pilot/loc'], threaded=False)
+
             from donkeycar.parts.actuator import RobocarsHat
             train_controller = RobocarsHat(cfg)
-            V.add(train_controller, inputs=['throttle','angle'], threaded=False)
+            inputs=['throttle','angle']
+#            if cfg.TRAIN_LOCALIZER:
+#                inputs.append("pilot/loc")
+            V.add(train_controller, inputs=inputs, threaded=False)
 
 
 if __name__ == '__main__':

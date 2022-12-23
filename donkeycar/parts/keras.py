@@ -320,14 +320,19 @@ class KerasLinear(KerasPilot):
     def __init__(self,
                  interpreter: Interpreter = KerasInterpreter(),
                  input_shape: Tuple[int, ...] = (120, 160, 3),
-                 num_outputs: int = 2, have_odom=False):
+                 num_outputs: int = 2, have_odom=False, have_loc=False, num_loc=0):
         self.num_outputs = num_outputs
         self.have_odom=have_odom
+        self.have_loc=have_loc
+        self.num_loc=num_loc
         super().__init__(interpreter, input_shape)
 
     def create_model(self):
         if self.have_odom:
-            return default_n_linear_odom(self.num_outputs, self.input_shape)
+            if self.have_loc:
+                return default_n_linear_odom_loc(self.num_outputs, self.input_shape, self.num_loc)
+            else:
+                return default_n_linear_odom(self.num_outputs, self.input_shape)
         else:
             return default_n_linear(self.num_outputs, self.input_shape)
 
@@ -337,7 +342,12 @@ class KerasLinear(KerasPilot):
     def interpreter_to_output(self, interpreter_out):
         steering = interpreter_out[0]
         throttle = interpreter_out[1]
-        return steering[0], throttle[0]
+        outputs = steering[0], throttle[0]
+        if self.have_loc:
+            track_loc = interpreter_out[2]
+            loc = np.argmax(track_loc)
+            outputs.update (loc)
+        return outputs
 
     def x_transform(
             self,
@@ -358,7 +368,13 @@ class KerasLinear(KerasPilot):
         assert isinstance(record, TubRecord), 'TubRecord expected'
         angle: float = record.underlying['user/angle']
         throttle: float = record.underlying['user/throttle']
-        return {'n_outputs0': angle, 'n_outputs1': throttle}
+        y_trans = {'n_outputs0': angle, 'n_outputs1': throttle}
+        if self.have_loc:
+            loc: int = int(record.underlying['localizer/location'])
+            loc_one_hot = np.zeros(self.num_loc)
+            loc_one_hot[loc] = 1
+            y_trans.update({'zloc': loc_one_hot})
+        return y_trans
 
     def output_shapes(self):
         # need to cut off None from [None, 120, 160, 3] tensor shape
@@ -368,6 +384,8 @@ class KerasLinear(KerasPilot):
             shapes_in.update({'speed_in': tf.TensorShape([1])})
         shapes_out={'n_outputs0': tf.TensorShape([]),
                     'n_outputs1': tf.TensorShape([])}
+        if self.have_loc:
+            shapes_out.update({'zloc': tf.TensorShape([self.num_loc])})
         return (shapes_in, shapes_out)
 
 
@@ -886,6 +904,35 @@ def default_n_linear_odom(num_outputs, input_shape=(120, 160, 3)):
         outputs.append(
             Dense(1, activation='linear', name='n_outputs' + str(i))(z))
 
+    model = Model(inputs=[img_in, speed_in], outputs=outputs, name='linear')
+    return model
+
+def default_n_linear_odom_loc(num_outputs, input_shape=(120, 160, 3), num_locations=10):
+    drop = 0.2
+    img_in = Input(shape=input_shape, name='img_in')
+    speed_in = Input(shape=(1,), name="speed_in")
+    x = core_cnn_layers(img_in, drop)
+    x = Dense(100, activation='relu')(x)
+    x = Dropout(.1)(x)
+
+    y = speed_in
+    y = Dense(2, activation='relu')(y)
+    y = Dense(2, activation='relu')(y)
+    y = Dense(2, activation='relu')(y)
+
+    z = concatenate([x, y])
+    z = Dense(50, activation='relu')(z)
+    z = Dropout(.1)(z)
+    z = Dense(50, activation='relu')(z)
+    z = Dropout(.1)(z)
+
+
+    outputs = []
+    for i in range(num_outputs):
+        outputs.append(
+            Dense(1, activation='linear', name='n_outputs' + str(i))(z))
+    loc_out = Dense(num_locations, activation='softmax', name='zloc')(z)
+    outputs.append(loc_out)
     model = Model(inputs=[img_in, speed_in], outputs=outputs, name='linear')
     return model
 
