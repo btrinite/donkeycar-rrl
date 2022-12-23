@@ -849,6 +849,11 @@ def add_imu(V, cfg):
 #
 def add_drivetrain(V, cfg):
 
+    if cfg.TRAIN_LOCALIZER and cfg.ROBOCARS_DRIVE_ON_LANE:
+        from donkeycar.parts.actuator import RobocarsHatLaneCtrl
+        lane_controller = RobocarsHatLaneCtrl(cfg)
+        V.add(lane_controller, inputs=['throttle','angle','user/mode','pilot/loc'], outputs=['throttle','angle'], threaded=False)
+
     if (not cfg.DONKEY_GYM) and cfg.DRIVE_TRAIN_TYPE != "MOCK":
         from donkeycar.parts import actuator, pins
         from donkeycar.parts.actuator import TwoWheelSteeringThrottle
@@ -1054,11 +1059,6 @@ def add_drivetrain(V, cfg):
                         )
             V.add(vesc, inputs=['angle', 'throttle'])
         elif cfg.DRIVE_TRAIN_TYPE == "ROBOCARSHAT":
-            if cfg.TRAIN_LOCALIZER:
-                from donkeycar.parts.actuator import RobocarsHatLaneCtrl
-                lane_controller = RobocarsHatLaneCtrl(cfg)
-                V.add(lane_controller, inputs=['throttle','angle','user/mode','pilot/loc'], outputs=['throttle','angle'], threaded=False)
-
             from donkeycar.parts.actuator import RobocarsHat
             train_controller = RobocarsHat(cfg)
             inputs=['throttle','angle']

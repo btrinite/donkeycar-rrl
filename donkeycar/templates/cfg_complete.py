@@ -635,6 +635,7 @@ BEHAVIOR_LED_COLORS = [(0, 10, 0), (10, 0, 0)]  #RGB tuples 0-100 per chanel
 #to predict the segement of the course, where the course is divided into NUM_LOCATIONS segments.
 TRAIN_LOCALIZER = False
 NUM_LOCATIONS = 10
+ROBOCARS_DRIVE_ON_LANE=False
 BUTTON_PRESS_NEW_TUB = False #when enabled, makes it easier to divide our data into one tub per track length if we make a new tub on each X button press.
 
 #DonkeyGym
