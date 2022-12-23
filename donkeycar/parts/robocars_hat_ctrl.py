@@ -3,7 +3,7 @@ import donkeycar as dk
 import re
 import time
 import logging
-from donkeycar.utils import Singleton
+from donkeycar.utils import Singleton, bound
 import numpy as np
 from donkeycar.parts.actuator import RobocarsHat
 from donkeycar.utilities.logger import init_special_logger
@@ -442,7 +442,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
             if (loc-requested_lane)>0:
                 needed_adjustment = - needed_adjustment
             mylogger.debug(f"LaneCtrl current lane:{loc}, requested lane: {requested_lane}, adjust steering by {needed_adjustment}")      
-            self.angle=angle+needed_adjustment
+            self.angle=bound(-1,1,angle+needed_adjustment)
 
     def update(self):
         # not implemented
