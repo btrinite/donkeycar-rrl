@@ -220,7 +220,6 @@ class RobocarsHatInCtrl(metaclass=Singleton):
 
     def processAltModes(self):
         self.recording=False
-        self.mode='user'
         user_throttle = self.inThrottle
         user_steering = self.inSteering
 
@@ -229,9 +228,12 @@ class RobocarsHatInCtrl(metaclass=Singleton):
         if command != None :
             if (command<-0.5):
                 self.recording=True
-            if (command>0.5):
+                self.mode='user'
+            elif (command>0.5):
                 self.mode=self.cfg.ROBOCARSHAT_PILOT_MODE
                 user_throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
+            else:
+                self.mode='user'
 
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_RECORD)
         if command != None :
@@ -306,7 +308,7 @@ class RobocarsHatInCtrl(metaclass=Singleton):
                 self.requested_lane = 2
             else:
                 self.requested_lane = 1 
-            mylogger.info(f"CtrlIn Requested Lane set to {self.lane}")
+            mylogger.info(f"CtrlIn Requested Lane set to {self.requested_lane}")
 
         # Process other features 
         if self.cfg.ROBOCARSHAT_STEERING_FIX != None:
