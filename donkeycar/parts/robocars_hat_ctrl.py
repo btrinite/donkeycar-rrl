@@ -258,7 +258,7 @@ class RobocarsHatInCtrl:
                 if command < -0.5:
                     self.fixSteering = max(self.fixSteering-self.cfg.ROBOCARSHAT_STEERING_EXP_INC,-1.0)
                     mylogger.info("CtrlIn Fixed steering set to {}".format(self.fixSteering))
-                user_steering = self.fixSteering            
+            user_steering = self.fixSteering            
 
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_OUTPUT_STEERING_TRIM)
         if command != None :
