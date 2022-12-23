@@ -363,7 +363,7 @@ class RobocarsHatInCtrl(metaclass=Singleton):
     def shutdown(self):
         # indicate that the thread should be stopped
         self.on = False
-        print('stopping Robocars Hat Controller')
+        print('stopping RobocarsHatInCtrl Hat Controller')
         time.sleep(.5)
 
 class RobocarsHatInOdom:
@@ -410,7 +410,7 @@ class RobocarsHatInOdom:
     def shutdown(self):
         # indicate that the thread should be stopped
         self.on = False
-        print('stopping Robocars Hat Controller')
+        print('stopping RobocarsHatInOdom Hat Controller')
         time.sleep(.5)
 
 #class RobocarsHatInBattery:
@@ -424,6 +424,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
         self.throttle = 0
         self.steering = 0
         self.lane = 0
+        self.on = True
 
     def processLane(self,steering, throttle, mode, loc):
 
@@ -449,7 +450,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
     def shutdown(self):
         # indicate that the thread should be stopped
         self.on = False
-        print('stopping Robocars Hat Controller')
+        print('stopping RobocarsHatLaneCtrl Hat Controller')
         time.sleep(.5)
 
 

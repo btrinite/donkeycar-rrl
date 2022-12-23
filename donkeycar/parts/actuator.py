@@ -1186,7 +1186,6 @@ class RobocarsHat (metaclass=Singleton):
             RobocarsHat.robocarshat_device = serial.Serial(self.cfg.ROBOCARSHAT_SERIAL_PORT, 1000000, timeout = 0.01)
 
         self.running = True
-        print('RobocarsHat drive train created')
 
     def setSteeringTrim (self, steeringTrim) :
         RobocarsHat.steeringTrim=steeringTrim

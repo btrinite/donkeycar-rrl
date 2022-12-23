@@ -342,12 +342,12 @@ class KerasLinear(KerasPilot):
     def interpreter_to_output(self, interpreter_out):
         steering = interpreter_out[0]
         throttle = interpreter_out[1]
-        outputs = steering[0], throttle[0]
         if self.have_loc:
             track_loc = interpreter_out[2]
             loc = np.argmax(track_loc)
-            outputs.update (loc)
-        return outputs
+            steering[0], throttle[0], loc
+        else:
+            return steering[0], throttle[0]
 
     def x_transform(
             self,
