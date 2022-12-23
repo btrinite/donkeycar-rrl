@@ -144,7 +144,7 @@ class RobocarsHatInCtrl:
             self.fixOutputSteering = 1500
 
         if self.cfg.ROBOCARSHAT_THROTTLE_DISCRET != None:
-            self.discretesThrottle = np.arange(0.0,1.0001,1.0/(len(self.cfg.ROBOCARSHAT_THROTTLE_DISCRET)-1))
+            self.discretesThrottle = np.arange(0.0,1.0001,1.0/len(self.cfg.ROBOCARSHAT_THROTTLE_DISCRET))
             mylogger.info("CtrlIn Discrete throttle thresholds set to {}".format(self.discretesThrottle))
 
         self.hatInMsg = RobocarsHatIn(self.cfg)
@@ -303,6 +303,7 @@ class RobocarsHatInCtrl:
         if (self.mode=='user' and self.cfg.ROBOCARSHAT_THROTTLE_DISCRET != None) :
             inds = np.digitize(user_throttle, self.discretesThrottle)
             inds = max(inds,1)
+            inds = min(inds, len(cfg.ROBOCARSHAT_THROTTLE_DISCRET))
             user_throttle = self.cfg.ROBOCARSHAT_THROTTLE_DISCRET[inds-1]
 
         if self.cfg.ROBOCARSHAT_AUTORECORD_ON_THROTTLE and user_throttle>0.05:
