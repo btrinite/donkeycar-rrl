@@ -120,6 +120,7 @@ class RobocarsHatInCtrl:
         self.lastAux2 = -1.0
         self.recording=False
         self.mode = 'user'
+        self.lane = 1
         self.lastMode = self.mode
         self.applyBrake = 0
 
@@ -281,6 +282,16 @@ class RobocarsHatInCtrl:
                     self.fixOutputSteering = max(self.fixOutputSteering-self.cfg.ROBOCARSHAT_OUTPUT_STEERING_TRIM_INC,1000)
                     mylogger.info("CtrlIn Fixed output steering set to {}".format(self.fixOutputSteering))
                 self.hatActuator.setFixSteering (self.fixOutputSteering)            
+
+        command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_OLANE_ANNOTATION)
+        if command != None and has_changed:
+            if command < -0.5:
+                self.lane = 0
+            elif command > 0.5:
+                self.lane = 2
+            else:
+                self.lane = 1 
+            mylogger.info(f"CtrlIn Lane set to {self.lane}")
 
         # Process other features 
         if self.cfg.ROBOCARSHAT_STEERING_FIX != None:
