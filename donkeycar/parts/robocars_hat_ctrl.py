@@ -432,7 +432,13 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
         self.angle = angle
         requested_lane = self.hatInCtrl.getRequestedLane()
         if mode != 'user':
-            print (loc)
+            # 0 : left,
+            # 1 : center,
+            # 2 : right
+            needed_adjustment = self.cfg.ROBOCARS_LOCALIZER_STEERING_ADJUST_STEPS[abs(loc-requested_lane)]
+            if (loc-requested_lane)>0:
+                needed_adjustment = - needed_adjustment
+            angle=angle+needed_adjustment
 
     def update(self):
         # not implemented

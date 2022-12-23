@@ -559,6 +559,10 @@ ROBOCARSHAT_THROTTLE_FLANGER = [-0.2,0.2]
 # ROBOCARSHAT_USE_AUTOCALIBRATION used to rely on idle coming from autocalibation done by hat
 ROBOCARSHAT_USE_AUTOCALIBRATION = True
 
+# Drive On Lane
+ROBOCARS_LOCALIZER_DRIVE_ON_LANE=False
+ROBOCARS_LOCALIZER_STEERING_ADJUST_STEPS=[0,0.2,0.4]
+
 
 #LOGGING
 HAVE_CONSOLE_LOGGING = True
@@ -635,7 +639,6 @@ BEHAVIOR_LED_COLORS = [(0, 10, 0), (10, 0, 0)]  #RGB tuples 0-100 per chanel
 #to predict the segement of the course, where the course is divided into NUM_LOCATIONS segments.
 TRAIN_LOCALIZER = False
 NUM_LOCATIONS = 10
-ROBOCARS_DRIVE_ON_LANE=False
 BUTTON_PRESS_NEW_TUB = False #when enabled, makes it easier to divide our data into one tub per track length if we make a new tub on each X button press.
 
 #DonkeyGym
