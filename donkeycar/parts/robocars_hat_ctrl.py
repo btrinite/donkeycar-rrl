@@ -105,7 +105,7 @@ class RobocarsHatInCtrl(metaclass=Singleton):
             return self.AUX_FEATURE_LANE_ANNOTATION
         elif feature == 'drive_on_lane':
             return self.AUX_FEATURE_DRIVE_ON_LANE
-        elif feature != None:
+        elif feature != 'none':
             mylogger.info(f"CtrlIn : Unkown requested feature : {feature}")
 
     def __init__(self, cfg):
