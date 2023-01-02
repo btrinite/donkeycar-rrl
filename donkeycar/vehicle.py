@@ -196,14 +196,26 @@ class Vehicle:
                 # get inputs from memory
                 inputs = self.mem.get(entry['inputs'])
                 # run the part
-                if entry.get('thread'):
-                    outputs = p.run_threaded(*inputs)
-                else:
-                    outputs = p.run(*inputs)
+                try:
+                    if entry.get('thread'):
+                        outputs = p.run_threaded(*inputs)
+                    else:
+                        outputs = p.run(*inputs)
+                except Exception as e:
+                    print(f"Unable to run parts {entry}")
+                    traceback.print_exc()
+                finally:
+                    self.stop()
 
                 # save the output to memory
                 if outputs is not None:
-                    self.mem.put(entry['outputs'], outputs)
+                    try:
+                        self.mem.put(entry['outputs'], outputs)
+                    except Exception as e:
+                        print(f"Unable to get outputs from parts {entry}")
+                        traceback.print_exc()
+                    finally:
+                        self.stop()
                 # finish timing part run
                 self.profiler.on_part_finished(p)
 
