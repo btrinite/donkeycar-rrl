@@ -431,10 +431,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
     LANE_CENTER=1
     LANE_RIGHT=2    
     
-    LANE_LABEL=[]
-    LANE_LABEL[LANE_LEFT]="left"
-    LANE_LABEL[LANE_CENTER]="center"
-    LANE_LABEL[LANE_RIGHT]="right"
+    LANE_LABEL=["left","center","right"]
 
     TURN_DEFAULT = 0
     TURN_BRAKE_LEFT_TURN = 1
@@ -443,13 +440,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
     TURN_RIGHT_TURN = 4
     TURN_STRAIGHT_LINE = 5
 
-    TURN_LABEL=[]
-    TURN_LABEL[TURN_DEFAULT] = "default"
-    TURN_LABEL[TURN_BRAKE_LEFT_TURN] = "left turn entry"
-    TURN_LABEL[TURN_LEFT_TURN] = "left turn"
-    TURN_LABEL[TURN_BRAKE_RIGHT_TURN] = "right turn entry"
-    TURN_LABEL[TURN_RIGHT_TURN] = "right turn"
-    TURN_LABEL[TURN_STRAIGHT_LINE] = "straigt line"
+    TURN_LABEL=["default","left turn entry","left turn","right turn entry","right turn","straigt line"]
 
     
     def __init__(self, cfg):
