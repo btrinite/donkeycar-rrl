@@ -320,32 +320,43 @@ class KerasLinear(KerasPilot):
     def __init__(self,
                  interpreter: Interpreter = KerasInterpreter(),
                  input_shape: Tuple[int, ...] = (120, 160, 3),
-                 num_outputs: int = 2, have_odom=False, have_loc=False, num_loc=0):
+                 num_outputs: int = 2, have_odom=False, have_lane_loc=False, num_lane_cat=0, have_turn_loc=False, num_turn_cat=0):
         self.num_outputs = num_outputs
         self.have_odom=have_odom
-        self.have_loc=have_loc
-        self.num_loc=num_loc
+        self.have_lane_loc=have_lane_loc
+        self.num_lane=num_lane_cat
+        self.have_turn_loc=have_turn_loc
+        self.num_turn=num_turn_cat
         super().__init__(interpreter, input_shape)
 
     def create_model(self):
         if self.have_odom:
-            if self.have_loc:
-                return default_n_linear_odom_loc(self.num_outputs, self.input_shape, self.num_loc)
+            if self.have_lane_loc:
+                if self.have_turn_loc:
+                    return default_n_linear_odom_lane_turn(self.num_outputs, self.input_shape, self.num_lane, self.num_turn)
+                else:
+                    return default_n_linear_odom_lane(self.num_outputs, self.input_shape, self.num_lane)
             else:
                 return default_n_linear_odom(self.num_outputs, self.input_shape)
         else:
             return default_n_linear(self.num_outputs, self.input_shape)
 
     def compile(self):
-        self.interpreter.compile(optimizer=self.optimizer, loss='mse')
+        self.interpreter.compile(optimizer=self.optimizer, metrics=['acc'], loss='mse')
 
     def interpreter_to_output(self, interpreter_out):
         steering = interpreter_out[0]
         throttle = interpreter_out[1]
-        if self.have_loc:
-            track_loc = interpreter_out[2]
-            loc = np.argmax(track_loc)
-            return steering[0], throttle[0], loc
+        if self.have_lane_loc:
+            track_lane = interpreter_out[2]
+            lane = np.argmax(track_lane)
+            if self.have_turn_loc:
+                track_turn = interpreter_out[3]
+                turn = np.argmax(track_turn)
+                print (lane)
+                return steering[0], throttle[0], lane, turn
+            else:
+                return steering[0], throttle[0], lane
         else:
             return steering[0], throttle[0]
 
@@ -369,11 +380,16 @@ class KerasLinear(KerasPilot):
         angle: float = record.underlying['user/angle']
         throttle: float = record.underlying['user/throttle']
         y_trans = {'n_outputs0': angle, 'n_outputs1': throttle}
-        if self.have_loc:
-            loc: int = int(record.underlying['localizer/location'])
-            loc_one_hot = np.zeros(self.num_loc)
-            loc_one_hot[loc] = 1
-            y_trans.update({'zloc': loc_one_hot})
+        if self.have_lane_loc:
+            lane: int = int(record.underlying['localizer/lane'])
+            lane_one_hot = np.zeros(self.num_lane)
+            lane_one_hot[lane] = 1
+            y_trans.update({'lane': lane_one_hot})
+        if self.have_turn_loc:
+            turn: int = int(record.underlying['localizer/turn'])
+            turn_one_hot = np.zeros(self.num_turn)
+            turn_one_hot[turn] = 1
+            y_trans.update({'turn': turn_one_hot})
         return y_trans
 
     def output_shapes(self):
@@ -384,8 +400,10 @@ class KerasLinear(KerasPilot):
             shapes_in.update({'speed_in': tf.TensorShape([1])})
         shapes_out={'n_outputs0': tf.TensorShape([]),
                     'n_outputs1': tf.TensorShape([])}
-        if self.have_loc:
-            shapes_out.update({'zloc': tf.TensorShape([self.num_loc])})
+        if self.have_lane_loc:
+            shapes_out.update({'lane': tf.TensorShape([self.num_lane])})
+        if self.have_turn_loc:
+            shapes_out.update({'turn': tf.TensorShape([self.num_turn])})
         return (shapes_in, shapes_out)
 
 
@@ -907,7 +925,7 @@ def default_n_linear_odom(num_outputs, input_shape=(120, 160, 3)):
     model = Model(inputs=[img_in, speed_in], outputs=outputs, name='linear')
     return model
 
-def default_n_linear_odom_loc(num_outputs, input_shape=(120, 160, 3), num_locations=10):
+def default_n_linear_odom_lane(num_outputs, input_shape=(120, 160, 3), num_lane=10):
     drop = 0.2
     img_in = Input(shape=input_shape, name='img_in')
     speed_in = Input(shape=(1,), name="speed_in")
@@ -931,8 +949,39 @@ def default_n_linear_odom_loc(num_outputs, input_shape=(120, 160, 3), num_locati
     for i in range(num_outputs):
         outputs.append(
             Dense(1, activation='linear', name='n_outputs' + str(i))(z))
-    loc_out = Dense(num_locations, activation='softmax', name='zloc')(z)
+    loc_out = Dense(num_lane, activation='softmax', name='lane')(z)
     outputs.append(loc_out)
+    model = Model(inputs=[img_in, speed_in], outputs=outputs, name='linear')
+    return model
+
+def default_n_linear_odom_lane_turn(num_outputs, input_shape=(120, 160, 3), num_lane=10, num_turn=10):
+    drop = 0.2
+    img_in = Input(shape=input_shape, name='img_in')
+    speed_in = Input(shape=(1,), name="speed_in")
+    x = core_cnn_layers(img_in, drop)
+    x = Dense(100, activation='relu')(x)
+    x = Dropout(.1)(x)
+
+    y = speed_in
+    y = Dense(2, activation='relu')(y)
+    y = Dense(2, activation='relu')(y)
+    y = Dense(2, activation='relu')(y)
+
+    z = concatenate([x, y])
+    z = Dense(50, activation='relu')(z)
+    z = Dropout(.1)(z)
+    z = Dense(50, activation='relu')(z)
+    z = Dropout(.1)(z)
+
+
+    outputs = []
+    for i in range(num_outputs):
+        outputs.append(
+            Dense(1, activation='linear', name='n_outputs' + str(i))(z))
+    lane_out = Dense(num_lane, activation='softmax', name='lane')(z)
+    outputs.append(lane_out)
+    turn_out = Dense(num_turn, activation='softmax', name='turn')(z)
+    outputs.append(turn_out)
     model = Model(inputs=[img_in, speed_in], outputs=outputs, name='linear')
     return model
 
@@ -961,7 +1010,6 @@ def default_memory(input_shape=(120, 160, 3), mem_length=3, mem_depth=0):
                for i in range(2)]
     model = Model(inputs=[img_in, mem_in], outputs=outputs, name='memory')
     return model
-
 
 def default_categorical(input_shape=(120, 160, 3)):
     drop = 0.2

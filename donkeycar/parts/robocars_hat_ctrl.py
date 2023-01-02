@@ -124,7 +124,7 @@ class RobocarsHatInCtrl(metaclass=Singleton):
         self.recording=False
         self.mode = 'user'
         self.lane = 0
-        self.requested_lane = 0
+        self.requested_lane = 1
         self.lastMode = self.mode
         self.applyBrake = 0
 
@@ -420,40 +420,73 @@ class RobocarsHatInOdom:
 
 class RobocarsHatLaneCtrl(metaclass=Singleton):
 
-    def __init__(self, cfg):
+    LANE_LEFT=0
+    LANE_CENTER=1
+    LANE_RIGHT=2
 
+    TURN_DEFAULT = 0
+    TURN_BRAKE_LEFT_TURN = 1
+    TURN_LEFT_TURN = 2
+    TURN_BRAKE_RIGHT_TURN = 3
+    TURN_RIGHT_TURN = 4
+    TURN_STRAIGHT_LINE = 5
+
+    def __init__(self, cfg):
         self.cfg = cfg
-        self.hatInCtrl = RobocarsHatInCtrl(self.cfg)
+        self.hatInCtrl = None
+        if (self.cfg.USE_ROBOCARSHAT_AS_CONTROLLER):
+            self.hatInCtrl = RobocarsHatInCtrl(self.cfg)
         self.throttle = 0
         self.steering = 0
         self.lane = 0
         self.on = True
 
-    def processLane(self,throttle, angle, mode, loc):
+    def processLane(self,throttle, angle, mode, lane, turn):
 
         self.throttle = throttle
         self.angle = angle
-        requested_lane = self.hatInCtrl.getRequestedLane()
+
+        print (f"Pilot : throttle = {throttle:.2f}, angle={angle:.2f},  Lane = {lane}, turn = {turn}")
+
         if mode != 'user':
-            # 0 : left,
-            # 1 : center,
-            # 2 : right
-            needed_adjustment = self.cfg.ROBOCARS_LOCALIZER_STEERING_ADJUST_STEPS[abs(loc-requested_lane)]
-            if (loc-requested_lane)>0:
-                needed_adjustment = - needed_adjustment
-            mylogger.debug(f"LaneCtrl current lane:{loc}, requested lane: {requested_lane}, adjust steering by {needed_adjustment}")      
-            self.angle=bound(angle+needed_adjustment,-1,1)
+
+            if self.cfg.ROBOCARS_TURN_MODEL == False:
+                if self.hatInCtrl:
+                    requested_lane = self.hatInCtrl.getRequestedLane()
+                else:
+                    requested_lane = self.LANE_CENTER
+            else:
+                if turn == self.TURN_RIGHT_TURN or turn == self.TURN_BRAKE_RIGHT_TURN:
+                    requested_lane = self.LANE_RIGHT
+                elif turn == self.TURN_LEFT_TURN or turn == self.TURN_BRAKE_LEFT_TURN:
+                    requested_lane = self.LANE_LEFT
+                else:
+                    requested_lane = self.LANE_CENTER
+
+            needed_adjustment = lane-requested_lane
+            needed_steering_adjustment = self.cfg.ROBOCARS_LOCALIZER_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
+            if (needed_adjustment)>0:
+                needed_steering_adjustment = - needed_steering_adjustment
+            mylogger.debug(f"LaneCtrl current lane:{lane}, requested lane: {requested_lane}, adjust steering by {needed_steering_adjustment}")      
+            self.angle=bound(angle+needed_steering_adjustment,-1,1)
+
+            self.throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
+            if (turn==self.TURN_STRAIGHT_LINE):
+                self.throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
+            if (turn==self.TURN_BRAKE_RIGHT_TURN or turn==self.TURN_BRAKE_LEFT_TURN):
+                self.throttle= self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
+
 
     def update(self):
         # not implemented
         pass
 
-    def run_threaded(self, throttle, angle, mode, loc):
+    def run_threaded(self, throttle, angle, mode, lane, turn):
         # not implemented
         pass
 
-    def run (self,throttle, angle, mode, loc):
-        self.processLane (throttle, angle, mode, loc)
+    def run (self,throttle, angle, mode, lane, turn):
+        self.processLane (throttle, angle, mode, lane, turn)
         return self.throttle, self.angle
     
 

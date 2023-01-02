@@ -519,7 +519,9 @@ ROBOCARSHAT_PWM_IN_AUX_MAX    =   2000
 #ODOM Sensor max value (max matching lowest speed)
 ROBOCARSHAT_ODOM_IN_MAX = 20000
 ROBOCARSHAT_PILOT_MODE = 'local' # Which autonomous mode is triggered by Hat : local_angle or local
-ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE = 0.2 # For pilot_angle autonomous mode (aka constant throttle)
+ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE = 0.3 # For pilot_angle autonomous mode, default throttle
+ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS = 0.6 # For pilot_angle autonomous mode, throttle for straight line parts 
+ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE = 0.2 # For pilot_angle autonomous mode, throttle for turn entry (brake)
 ROBOCARSHAT_BRAKE_ON_IDLE_THROTTLE = -0.2
 
 THROTTLE_BRAKE_REV_FILTER = False # ESC is configured in Fw/Rv mode (no braking)
@@ -561,9 +563,14 @@ ROBOCARSHAT_THROTTLE_FLANGER = [-0.2,0.2]
 ROBOCARSHAT_USE_AUTOCALIBRATION = True
 
 # Drive On Lane
+ROBOCARS_LANE_MODEL=False
+ROBOCARS_NUM_LANE=3
 ROBOCARS_LOCALIZER_DRIVE_ON_LANE=False
 ROBOCARS_LOCALIZER_STEERING_ADJUST_STEPS=[0,0.2,0.4]
 
+# Drive On turn
+ROBOCARS_TURN_MODEL=False
+ROBOCARS_NUM_TURN=5
 
 #LOGGING
 HAVE_CONSOLE_LOGGING = True

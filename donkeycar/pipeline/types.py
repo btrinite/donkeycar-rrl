@@ -28,7 +28,9 @@ TubRecordDict = TypedDict(
         'imu/gyr_y': Optional[float],
         'imu/gyr_z': Optional[float],
         'behavior/one_hot_state_array': Optional[List[float]],
-        'localizer/location': Optional[int]
+        'localizer/location': Optional[int],
+        'localizer/lane': Optional[int],
+        'localizer/turn': Optional[int]
     }
 )
 

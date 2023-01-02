@@ -394,6 +394,11 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
         if cfg.TRAIN_LOCALIZER:
             outputs.append("pilot/loc")
 
+        if cfg.ROBOCARS_LANE_MODEL:
+            outputs.append("pilot/lane")
+
+        if cfg.ROBOCARS_TURN_MODEL:
+            outputs.append("pilot/turn")
         #
         # Add image transformations like crop or trapezoidal mask
         #
@@ -443,9 +448,11 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
                 return user_angle, user_throttle
 
             elif mode == 'local_angle':
+                print (f"DriveMode: th:{user_throttle} st:{pilot_angle}")
                 return pilot_angle if pilot_angle else 0.0, user_throttle
 
             else:
+                print (f"DriveMode: th:{pilot_throttle} st:{pilot_angle}")
                 return pilot_angle if pilot_angle else 0.0, \
                        pilot_throttle * cfg.AI_THROTTLE_MULT \
                            if pilot_throttle else 0.0
@@ -555,6 +562,14 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
 
     if (cfg.TRAIN_LOCALIZER):
         inputs += ['localizer/location']
+        types += ['int']
+
+    if (cfg.ROBOCARS_LANE_MODEL):
+        inputs += ['localizer/lane']
+        types += ['int']
+
+    if (cfg.ROBOCARS_TURN_MODEL):
+        inputs += ['localizer/turn']
         types += ['int']
 
     # do we want to store new records into own dir or append to existing
@@ -671,8 +686,10 @@ def add_user_controller(V, cfg, use_joystick, input_image='cam/image_array'):
         ctr = RobocarsHatInCtrl(cfg)
         inputs=['user/angle', 'user/throttle', 'user/mode']
         outputs=['user/angle', 'user/throttle', 'user/mode', 'recording']
-        if (cfg.TRAIN_LOCALIZER):
-            outputs += ['localizer/location']
+        if (cfg.ROBOCARS_LANE_MODEL):
+            outputs += ['localizer/lane']
+        if (cfg.ROBOCARS_TURN_MODEL):
+            outputs += ['localizer/turn']
         V.add(ctr, inputs=inputs, outputs=outputs,threaded=False)
 
     return ctr
@@ -850,10 +867,10 @@ def add_imu(V, cfg):
 #
 def add_drivetrain(V, cfg):
 
-    if cfg.TRAIN_LOCALIZER and cfg.ROBOCARS_LOCALIZER_DRIVE_ON_LANE:
+    if cfg.ROBOCARS_LOCALIZER_DRIVE_ON_LANE :
         from donkeycar.parts.robocars_hat_ctrl import RobocarsHatLaneCtrl
         lane_controller = RobocarsHatLaneCtrl(cfg)
-        V.add(lane_controller, inputs=['throttle','angle','user/mode','pilot/loc'], outputs=['throttle','angle'], threaded=False)
+        V.add(lane_controller, inputs=['throttle','angle','user/mode','pilot/lane', 'pilot/turn'], outputs=['throttle','angle'], threaded=False)
 
     if (not cfg.DONKEY_GYM) and cfg.DRIVE_TRAIN_TYPE != "MOCK":
         from donkeycar.parts import actuator, pins
@@ -1063,8 +1080,6 @@ def add_drivetrain(V, cfg):
             from donkeycar.parts.actuator import RobocarsHat
             train_controller = RobocarsHat(cfg)
             inputs=['throttle','angle']
-#            if cfg.TRAIN_LOCALIZER:
-#                inputs.append("pilot/loc")
             V.add(train_controller, inputs=inputs, threaded=False)
 
 

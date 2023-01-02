@@ -493,7 +493,7 @@ def get_model_by_type(model_type: str, cfg: 'Config') -> Union['KerasPilot', 'Fa
 
     used_model_type = EqMemorizedString(used_model_type)
     if used_model_type == "linear":
-        kl = KerasLinear(interpreter=interpreter, input_shape=input_shape, have_odom=cfg.HAVE_ODOM, have_loc=cfg.TRAIN_LOCALIZER, num_loc=cfg.NUM_LOCATIONS)
+        kl = KerasLinear(interpreter=interpreter, input_shape=input_shape, have_odom=cfg.HAVE_ODOM, have_lane_loc=cfg.ROBOCARS_LANE_MODEL, num_lane_cat=cfg.ROBOCARS_NUM_LANE, have_turn_loc=cfg.ROBOCARS_TURN_MODEL, num_turn_cat=cfg.ROBOCARS_NUM_TURN)
     elif used_model_type == "categorical":
         kl = KerasCategorical(
             interpreter=interpreter,
