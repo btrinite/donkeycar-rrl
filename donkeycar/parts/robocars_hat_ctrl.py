@@ -456,12 +456,14 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
 
         if mode != 'user':
 
-            if self.cfg.ROBOCARS_TURN_MODEL == False:
+            if self.cfg.ROBOCARS_DRIVE_ON_LANE:
                 if self.hatInCtrl:
                     requested_lane = self.hatInCtrl.getRequestedLane()
                 else:
                     requested_lane = self.LANE_CENTER
-            else:
+
+            if self.cfg.ROBOCARS_DRIVE_ON_TURN:
+                # Select lane based on turn prediction
                 if turn == self.TURN_BRAKE_RIGHT_TURN: #next to turn on the right, switch on left lane
                     requested_lane = self.LANE_LEFT 
                 elif turn == self.TURN_RIGHT_TURN:  #inside turn on the right, keep on right lane
@@ -473,6 +475,14 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                 else:
                     requested_lane = self.LANE_CENTER
 
+                # Select throttle based on turn prediction
+                self.throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
+                if (turn==self.TURN_STRAIGHT_LINE):
+                    self.throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
+                if (turn==self.TURN_BRAKE_RIGHT_TURN or turn==self.TURN_BRAKE_LEFT_TURN):
+                    self.throttle= self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
+
+            # Adjust car steering to the reauested lane
             needed_adjustment = lane-requested_lane
             lanelogger.debug(f"LaneCtrl current lane:{lane}, requested lane: {requested_lane}, adjust needed {needed_adjustment}")      
             needed_steering_adjustment = self.cfg.ROBOCARS_LOCALIZER_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
@@ -481,11 +491,6 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
             lanelogger.debug(f"LaneCtrl -> adjust steering by {needed_steering_adjustment}")      
             self.angle=bound(angle+needed_steering_adjustment,-1,1)
 
-            self.throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
-            if (turn==self.TURN_STRAIGHT_LINE):
-                self.throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
-            if (turn==self.TURN_BRAKE_RIGHT_TURN or turn==self.TURN_BRAKE_LEFT_TURN):
-                self.throttle= self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
 
 
     def update(self):
