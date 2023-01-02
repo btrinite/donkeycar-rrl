@@ -204,8 +204,7 @@ class Vehicle:
                 except Exception as e:
                     print(f"Unable to run parts {entry}")
                     traceback.print_exc()
-                finally:
-                    self.stop()
+                    raise
 
                 # save the output to memory
                 if outputs is not None:
@@ -214,8 +213,7 @@ class Vehicle:
                     except Exception as e:
                         print(f"Unable to get outputs from parts {entry}")
                         traceback.print_exc()
-                    finally:
-                        self.stop()
+                        raise
                 # finish timing part run
                 self.profiler.on_part_finished(p)
 
