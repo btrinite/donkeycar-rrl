@@ -331,15 +331,9 @@ class KerasLinear(KerasPilot):
 
     def create_model(self):
         if self.have_odom:
-            if self.have_lane_loc:
-                if self.have_turn_loc:
-                    return default_n_linear_odom_lane_turn(self.num_outputs, self.input_shape, self.num_lane, self.num_turn)
-                else:
-                    return default_n_linear_odom_lane(self.num_outputs, self.input_shape, self.num_lane)
-            else:
-                return default_n_linear_odom(self.num_outputs, self.input_shape)
+            return default_n_linear_odom_lane_turn(num_outputs=self.num_outputs, input_shape=self.input_shape, num_lane=self.num_lane, num_turn=self.num_turn)
         else:
-            return default_n_linear(self.num_outputs, self.input_shape)
+            return default_n_linear(num_outputs=self.num_outputs, input_shape=self.input_shape)
 
     def compile(self):
         self.interpreter.compile(optimizer=self.optimizer, metrics=['acc'], loss='mse')
@@ -896,7 +890,7 @@ def default_n_linear(num_outputs, input_shape=(120, 160, 3)):
     model = Model(inputs=[img_in], outputs=outputs, name='linear')
     return model
 
-def default_n_linear_odom(num_outputs, input_shape=(120, 160, 3)):
+def default_n_linear_odom_lane_turn(num_outputs, input_shape=(120, 160, 3), num_lane=0, num_turn=0):
     drop = 0.2
     img_in = Input(shape=input_shape, name='img_in')
     speed_in = Input(shape=(1,), name="speed_in")
@@ -920,67 +914,12 @@ def default_n_linear_odom(num_outputs, input_shape=(120, 160, 3)):
     for i in range(num_outputs):
         outputs.append(
             Dense(1, activation='linear', name='n_outputs' + str(i))(z))
-
-    model = Model(inputs=[img_in, speed_in], outputs=outputs, name='linear')
-    return model
-
-def default_n_linear_odom_lane(num_outputs, input_shape=(120, 160, 3), num_lane=10):
-    drop = 0.2
-    img_in = Input(shape=input_shape, name='img_in')
-    speed_in = Input(shape=(1,), name="speed_in")
-    x = core_cnn_layers(img_in, drop)
-    x = Dense(100, activation='relu')(x)
-    x = Dropout(.1)(x)
-
-    y = speed_in
-    y = Dense(2, activation='relu')(y)
-    y = Dense(2, activation='relu')(y)
-    y = Dense(2, activation='relu')(y)
-
-    z = concatenate([x, y])
-    z = Dense(50, activation='relu')(z)
-    z = Dropout(.1)(z)
-    z = Dense(50, activation='relu')(z)
-    z = Dropout(.1)(z)
-
-
-    outputs = []
-    for i in range(num_outputs):
-        outputs.append(
-            Dense(1, activation='linear', name='n_outputs' + str(i))(z))
-    loc_out = Dense(num_lane, activation='softmax', name='lane')(z)
-    outputs.append(loc_out)
-    model = Model(inputs=[img_in, speed_in], outputs=outputs, name='linear')
-    return model
-
-def default_n_linear_odom_lane_turn(num_outputs, input_shape=(120, 160, 3), num_lane=10, num_turn=10):
-    drop = 0.2
-    img_in = Input(shape=input_shape, name='img_in')
-    speed_in = Input(shape=(1,), name="speed_in")
-    x = core_cnn_layers(img_in, drop)
-    x = Dense(100, activation='relu')(x)
-    x = Dropout(.1)(x)
-
-    y = speed_in
-    y = Dense(2, activation='relu')(y)
-    y = Dense(2, activation='relu')(y)
-    y = Dense(2, activation='relu')(y)
-
-    z = concatenate([x, y])
-    z = Dense(50, activation='relu')(z)
-    z = Dropout(.1)(z)
-    z = Dense(50, activation='relu')(z)
-    z = Dropout(.1)(z)
-
-
-    outputs = []
-    for i in range(num_outputs):
-        outputs.append(
-            Dense(1, activation='linear', name='n_outputs' + str(i))(z))
-    lane_out = Dense(num_lane, activation='softmax', name='lane')(z)
-    outputs.append(lane_out)
-    turn_out = Dense(num_turn, activation='softmax', name='turn')(z)
-    outputs.append(turn_out)
+    if num_lane>0:
+        lane_out = Dense(num_lane, activation='softmax', name='lane')(z)
+        outputs.append(lane_out)
+    if num_turn>0:
+        turn_out = Dense(num_turn, activation='softmax', name='turn')(z)
+        outputs.append(turn_out)
     model = Model(inputs=[img_in, speed_in], outputs=outputs, name='linear')
     return model
 

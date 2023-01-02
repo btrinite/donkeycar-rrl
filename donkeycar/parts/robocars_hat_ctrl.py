@@ -86,6 +86,10 @@ class RobocarsHatInCtrl(metaclass=Singleton):
     AUX_FEATURE_LANE_ANNOTATION=8
     AUX_FEATURE_DRIVE_ON_LANE=9
 
+    AUX_VALUE_LANE_LEFT=0
+    AUX_VALUE_LANE_CENTER=1
+    AUX_VALUE_LANE_RIGHT=2
+
     def _map_aux_feature (self, feature):
         if feature == 'record/pilot':
             return self.AUX_FEATURE_RECORDandPILOT
@@ -123,8 +127,8 @@ class RobocarsHatInCtrl(metaclass=Singleton):
         self.lastAux2 = -1.0
         self.recording=False
         self.mode = 'user'
-        self.lane = 0
-        self.requested_lane = 1
+        self.lane = self.AUX_VALUE_LANE_CENTER
+        self.requested_lane = self.AUX_VALUE_LANE_CENTER
         self.lastMode = self.mode
         self.applyBrake = 0
 
@@ -293,21 +297,21 @@ class RobocarsHatInCtrl(metaclass=Singleton):
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_LANE_ANNOTATION)
         if command != None and has_changed:
             if command < -0.5:
-                self.lane = 0
+                self.lane = self.AUX_VALUE_LANE_LEFT
             elif command > 0.5:
-                self.lane = 2
+                self.lane = self.AUX_VALUE_LANE_RIGHT
             else:
-                self.lane = 1 
+                self.lane = self.AUX_VALUE_LANE_CENTER 
             mylogger.info(f"CtrlIn Lane set to {self.lane}")
 
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_DRIVE_ON_LANE)
         if command != None and has_changed:
             if command < -0.5:
-                self.requested_lane = 0
+                self.requested_lane = self.AUX_VALUE_LANE_LEFT
             elif command > 0.5:
-                self.requested_lane = 2
+                self.requested_lane = self.AUX_VALUE_LANE_RIGHT
             else:
-                self.requested_lane = 1 
+                self.requested_lane = self.AUX_VALUE_LANE_CENTER
             mylogger.info(f"CtrlIn Requested Lane set to {self.requested_lane}")
 
         # Process other features 
