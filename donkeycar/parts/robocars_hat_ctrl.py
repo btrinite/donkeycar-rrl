@@ -429,7 +429,12 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
 
     LANE_LEFT=0
     LANE_CENTER=1
-    LANE_RIGHT=2
+    LANE_RIGHT=2    
+    
+    LANE_LABEL=[]
+    LANE_LABEL[LANE_LEFT]="left"
+    LANE_LABEL[LANE_CENTER]="center"
+    LANE_LABEL[LANE_RIGHT]="right"
 
     TURN_DEFAULT = 0
     TURN_BRAKE_LEFT_TURN = 1
@@ -438,6 +443,15 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
     TURN_RIGHT_TURN = 4
     TURN_STRAIGHT_LINE = 5
 
+    TURN_LABEL=[]
+    TURN_LABEL[TURN_DEFAULT] = "default"
+    TURN_LABEL[TURN_BRAKE_LEFT_TURN] = "left turn entry"
+    TURN_LABEL[TURN_LEFT_TURN] = "left turn"
+    TURN_LABEL[TURN_BRAKE_RIGHT_TURN] = "right turn entry"
+    TURN_LABEL[TURN_RIGHT_TURN] = "right turn"
+    TURN_LABEL[TURN_STRAIGHT_LINE] = "straigt line"
+
+    
     def __init__(self, cfg):
         self.cfg = cfg
         self.hatInCtrl = None
@@ -462,6 +476,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                     requested_lane = self.hatInCtrl.getRequestedLane()
 
             if self.cfg.ROBOCARS_DRIVE_ON_TURN:
+                lanelogger.debug(f"LaneCtrl turn predict:{LANE_LABEL[turn]}/{turn}")
                 # Select lane based on turn prediction
                 if turn == self.TURN_BRAKE_RIGHT_TURN: #next to turn on the right, switch on left lane
                     requested_lane = self.LANE_LEFT 
@@ -473,6 +488,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                     requested_lane = self.LANE_LEFT
                 else:
                     requested_lane = self.LANE_CENTER
+                lanelogger.debug(f"LaneCtrl     -> requested lane: {LANE_LABEL[requested_lane]}/{requested_lane}")      
 
                 # Select throttle based on turn prediction
                 self.throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
@@ -480,14 +496,15 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                     self.throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
                 if (turn==self.TURN_BRAKE_RIGHT_TURN or turn==self.TURN_BRAKE_LEFT_TURN):
                     self.throttle= self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
+                lanelogger.debug(f"LaneCtrl     -> enforce throttle: {self.throttle}")      
 
             # Adjust car steering to the reauested lane
             needed_adjustment = lane-requested_lane
-            lanelogger.debug(f"LaneCtrl current lane:{lane}, requested lane: {requested_lane}, adjust needed {needed_adjustment}")      
+            lanelogger.debug(f"LaneCtrl current lane:{LANE_LABEL[lane]}/{lane}, requested lane: {LANE_LABEL[requested_lane]}/{requested_lane}, adjust needed {needed_adjustment}")      
             needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
             if (needed_adjustment)>0:
                 needed_steering_adjustment = - needed_steering_adjustment
-            lanelogger.debug(f"LaneCtrl -> adjust steering by {needed_steering_adjustment}")      
+            lanelogger.debug(f"LaneCtrl     -> adjust steering by {needed_steering_adjustment}")      
             self.angle=bound(angle+needed_steering_adjustment,-1,1)
 
 
