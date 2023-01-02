@@ -464,10 +464,11 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                     requested_lane = self.LANE_CENTER
 
             needed_adjustment = lane-requested_lane
+            mylogger.debug(f"LaneCtrl current lane:{lane}, requested lane: {requested_lane}, adjust needed {needed_adjustment}")      
             needed_steering_adjustment = self.cfg.ROBOCARS_LOCALIZER_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
             if (needed_adjustment)>0:
                 needed_steering_adjustment = - needed_steering_adjustment
-            mylogger.debug(f"LaneCtrl current lane:{lane}, requested lane: {requested_lane}, adjust steering by {needed_steering_adjustment}")      
+            mylogger.debug(f"LaneCtrl -> adjust steering by {needed_steering_adjustment}")      
             self.angle=bound(angle+needed_steering_adjustment,-1,1)
 
             self.throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE

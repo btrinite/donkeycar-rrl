@@ -353,7 +353,6 @@ class KerasLinear(KerasPilot):
             if self.have_turn_loc:
                 track_turn = interpreter_out[3]
                 turn = np.argmax(track_turn)
-                print (lane)
                 return steering[0], throttle[0], lane, turn
             else:
                 return steering[0], throttle[0], lane
