@@ -487,17 +487,17 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                     self.throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
                 if (turn==self.TURN_BRAKE_RIGHT_TURN or turn==self.TURN_BRAKE_LEFT_TURN):
                     self.throttle= self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
-                lanelogger.debug(f"LaneCtrl     -> enforce throttle: {self.throttle}")      
 
             # Adjust car steering to the reauested lane
             needed_adjustment = lane-requested_lane
-            lanelogger.debug(f"LaneCtrl current lane:{LANE_LABEL[lane]}/{lane}, requested lane: {LANE_LABEL[requested_lane]}/{requested_lane}, adjust needed {needed_adjustment}")      
+            lanelogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
             needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
             if (needed_adjustment)>0:
                 needed_steering_adjustment = - needed_steering_adjustment
             lanelogger.debug(f"LaneCtrl     -> adjust steering by {needed_steering_adjustment}")      
             self.angle=bound(angle+needed_steering_adjustment,-1,1)
 
+            lanelogger.debug(f"LaneCtrl     -> enforce throttle: {self.throttle}")      
 
 
     def update(self):
