@@ -460,9 +460,13 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                 else:
                     requested_lane = self.LANE_CENTER
             else:
-                if turn == self.TURN_RIGHT_TURN or turn == self.TURN_BRAKE_RIGHT_TURN:
+                if turn == self.TURN_BRAKE_RIGHT_TURN: #next to turn on the right, switch on left lane
+                    requested_lane = self.LANE_LEFT 
+                elif turn == self.TURN_RIGHT_TURN:  #inside turn on the right, keep on right lane
+                    requested_lane = self.LANE_RIGHT 
+                elif turn == self.TURN_BRAKE_LEFT_TURN: #next to turn on the left, switch on right lane
                     requested_lane = self.LANE_RIGHT
-                elif turn == self.TURN_LEFT_TURN or turn == self.TURN_BRAKE_LEFT_TURN:
+                elif turn == self.TURN_LEFT_TURN: #inside turn on the left, kepp on left lane
                     requested_lane = self.LANE_LEFT
                 else:
                     requested_lane = self.LANE_CENTER
