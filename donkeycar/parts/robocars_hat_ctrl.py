@@ -467,7 +467,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                     requested_lane = self.hatInCtrl.getRequestedLane()
 
             if self.cfg.ROBOCARS_DRIVE_ON_TURN:
-                lanelogger.debug(f"LaneCtrl turn predict:{LANE_LABEL[turn]}/{turn}")
+                lanelogger.debug(f"LaneCtrl lane predict:{self.LANE_LABEL[lane]}, turn predict:{self.TURN_LABEL[turn]}/{turn}")
                 # Select lane based on turn prediction
                 if turn == self.TURN_BRAKE_RIGHT_TURN: #next to turn on the right, switch on left lane
                     requested_lane = self.LANE_LEFT 
@@ -479,7 +479,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                     requested_lane = self.LANE_LEFT
                 else:
                     requested_lane = self.LANE_CENTER
-                lanelogger.debug(f"LaneCtrl     -> requested lane: {LANE_LABEL[requested_lane]}/{requested_lane}")      
+                lanelogger.debug(f"LaneCtrl     -> requested lane: {self.LANE_LABEL[requested_lane]}/{requested_lane}")      
 
                 # Select throttle based on turn prediction
                 self.throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
