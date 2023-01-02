@@ -456,11 +456,10 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
 
         if mode != 'user':
 
+            requested_lane = self.LANE_CENTER
             if self.cfg.ROBOCARS_DRIVE_ON_LANE:
                 if self.hatInCtrl:
                     requested_lane = self.hatInCtrl.getRequestedLane()
-                else:
-                    requested_lane = self.LANE_CENTER
 
             if self.cfg.ROBOCARS_DRIVE_ON_TURN:
                 # Select lane based on turn prediction
