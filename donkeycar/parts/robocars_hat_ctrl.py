@@ -485,7 +485,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
             # Adjust car steering to the reauested lane
             needed_adjustment = lane-requested_lane
             lanelogger.debug(f"LaneCtrl current lane:{lane}, requested lane: {requested_lane}, adjust needed {needed_adjustment}")      
-            needed_steering_adjustment = self.cfg.ROBOCARS_LOCALIZER_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
+            needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
             if (needed_adjustment)>0:
                 needed_steering_adjustment = - needed_steering_adjustment
             lanelogger.debug(f"LaneCtrl -> adjust steering by {needed_steering_adjustment}")      
