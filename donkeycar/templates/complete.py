@@ -448,11 +448,9 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
                 return user_angle, user_throttle
 
             elif mode == 'local_angle':
-                print (f"DriveMode: th:{user_throttle} st:{pilot_angle}")
                 return pilot_angle if pilot_angle else 0.0, user_throttle
 
             else:
-                print (f"DriveMode: th:{pilot_throttle} st:{pilot_angle}")
                 return pilot_angle if pilot_angle else 0.0, \
                        pilot_throttle * cfg.AI_THROTTLE_MULT \
                            if pilot_throttle else 0.0
