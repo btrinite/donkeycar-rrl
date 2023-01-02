@@ -422,6 +422,9 @@ class RobocarsHatInOdom:
 
 #class RobocarsHatInBattery:
 
+lanelogger = init_special_logger ("Rx")
+lanelogger.setLevel(logging.DEBUG)
+
 class RobocarsHatLaneCtrl(metaclass=Singleton):
 
     LANE_LEFT=0
@@ -444,13 +447,12 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
         self.steering = 0
         self.lane = 0
         self.on = True
+        lanelogger.info('starting RobocarsHatLaneCtrl Hat Controller')
 
     def processLane(self,throttle, angle, mode, lane, turn):
 
         self.throttle = throttle
         self.angle = angle
-
-        print (f"Pilot : throttle = {throttle:.2f}, angle={angle:.2f},  Lane = {lane}, turn = {turn}")
 
         if mode != 'user':
 
@@ -472,11 +474,11 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                     requested_lane = self.LANE_CENTER
 
             needed_adjustment = lane-requested_lane
-            mylogger.debug(f"LaneCtrl current lane:{lane}, requested lane: {requested_lane}, adjust needed {needed_adjustment}")      
+            lanelogger.debug(f"LaneCtrl current lane:{lane}, requested lane: {requested_lane}, adjust needed {needed_adjustment}")      
             needed_steering_adjustment = self.cfg.ROBOCARS_LOCALIZER_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
             if (needed_adjustment)>0:
                 needed_steering_adjustment = - needed_steering_adjustment
-            mylogger.debug(f"LaneCtrl -> adjust steering by {needed_steering_adjustment}")      
+            lanelogger.debug(f"LaneCtrl -> adjust steering by {needed_steering_adjustment}")      
             self.angle=bound(angle+needed_steering_adjustment,-1,1)
 
             self.throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
@@ -502,7 +504,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
     def shutdown(self):
         # indicate that the thread should be stopped
         self.on = False
-        print('stopping RobocarsHatLaneCtrl Hat Controller')
+        lanelogger.info('stopping RobocarsHatLaneCtrl Hat Controller')
         time.sleep(.5)
 
 
