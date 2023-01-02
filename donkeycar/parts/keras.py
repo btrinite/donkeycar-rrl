@@ -331,7 +331,7 @@ class KerasLinear(KerasPilot):
 
     def create_model(self):
         if self.have_odom:
-            return default_n_linear_odom_lane_turn(num_outputs=self.num_outputs, input_shape=self.input_shape, num_lane=self.num_lane, num_turn=self.num_turn)
+            return default_n_linear_odom_lane_turn(num_outputs=self.num_outputs, input_shape=self.input_shape, num_lane=self.num_lane if self.have_lane_loc else 0, num_turn=self.num_turn if self.have_turn_loc else 0)
         else:
             return default_n_linear(num_outputs=self.num_outputs, input_shape=self.input_shape)
 
@@ -377,12 +377,12 @@ class KerasLinear(KerasPilot):
             lane: int = int(record.underlying['localizer/lane'])
             lane_one_hot = np.zeros(self.num_lane)
             lane_one_hot[lane] = 1
-            y_trans.update({'lane': lane_one_hot})
+            y_trans.update({'n_outputs2': lane_one_hot})
         if self.have_turn_loc:
             turn: int = int(record.underlying['localizer/turn'])
             turn_one_hot = np.zeros(self.num_turn)
             turn_one_hot[turn] = 1
-            y_trans.update({'turn': turn_one_hot})
+            y_trans.update({'n_outputs3': turn_one_hot})
         return y_trans
 
     def output_shapes(self):
@@ -394,9 +394,9 @@ class KerasLinear(KerasPilot):
         shapes_out={'n_outputs0': tf.TensorShape([]),
                     'n_outputs1': tf.TensorShape([])}
         if self.have_lane_loc:
-            shapes_out.update({'lane': tf.TensorShape([self.num_lane])})
+            shapes_out.update({'n_outputs2': tf.TensorShape([self.num_lane])})
         if self.have_turn_loc:
-            shapes_out.update({'turn': tf.TensorShape([self.num_turn])})
+            shapes_out.update({'n_outputs3': tf.TensorShape([self.num_turn])})
         return (shapes_in, shapes_out)
 
 
@@ -915,10 +915,10 @@ def default_n_linear_odom_lane_turn(num_outputs, input_shape=(120, 160, 3), num_
         outputs.append(
             Dense(1, activation='linear', name='n_outputs' + str(i))(z))
     if num_lane>0:
-        lane_out = Dense(num_lane, activation='softmax', name='lane')(z)
+        lane_out = Dense(num_lane, activation='softmax', name='n_outputs' + str(num_outputs))(z)
         outputs.append(lane_out)
     if num_turn>0:
-        turn_out = Dense(num_turn, activation='softmax', name='turn')(z)
+        turn_out = Dense(num_turn, activation='softmax', name='n_outputs' + str(num_outputs+1))(z)
         outputs.append(turn_out)
     model = Model(inputs=[img_in, speed_in], outputs=outputs, name='linear')
     return model
