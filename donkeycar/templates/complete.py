@@ -688,8 +688,6 @@ def add_user_controller(V, cfg, use_joystick, input_image='cam/image_array'):
         outputs=['user/angle', 'user/throttle', 'user/mode', 'recording']
         if (cfg.ROBOCARS_LANE_MODEL):
             outputs += ['localizer/lane']
-        if (cfg.ROBOCARS_TURN_MODEL):
-            outputs += ['localizer/turn']
         V.add(ctr, inputs=inputs, outputs=outputs,threaded=False)
 
     return ctr
