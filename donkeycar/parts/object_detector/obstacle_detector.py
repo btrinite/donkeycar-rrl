@@ -38,14 +38,14 @@ class ObstacleDetector(object):
     '''
     Return an object if there is a traffic light in the frame
     '''
-    def detect_stop_sign (self, img_arr):
+    def detect_obstacle (self, img_arr):
         img = self.convertImageArrayToPILImage(img_arr)
 
         ans = self.engine.detect_with_image(img,
                                           threshold=self.min_score,
                                           keep_aspect_ratio=True,
                                           relative_coord=False,
-                                          top_k=3)
+                                          top_k=3, Image.NEAREST)
         max_score = 0
         obstacle_obj = None
         if ans:
@@ -93,10 +93,14 @@ class ObstacleDetector(object):
             return img_arr
 
         # Detect traffic light object
-        obstacle_obj = self.detect_stop_sign(img_arr)
+        obstacle_obj = self.detect_obstacle(img_arr)
 
+        label="--"
+        coords="--"
         if obstacle_obj:
+            label = self.labels[obstacle_obj.label_id]
+            coords = f"{obstacle_obj.bounding_box[0][0]},{obstacle_obj.bounding_box[1][0]},{obstacle_obj.bounding_box[0][1]},{obstacle_obj.bounding_box[1][1]}"
             if self.show_bounding_box and obstacle_obj != None:
                 self.draw_bounding_box(obstacle_obj, img_arr)
             
-        return img_arr
+        return img_arr, label, coords, 
