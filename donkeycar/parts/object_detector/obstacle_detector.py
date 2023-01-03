@@ -45,7 +45,7 @@ class ObstacleDetector(object):
                                           threshold=self.min_score,
                                           keep_aspect_ratio=True,
                                           relative_coord=False,
-                                          top_k=3, Image.NEAREST)
+                                          top_k=3)
         max_score = 0
         obstacle_obj = None
         if ans:
