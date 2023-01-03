@@ -128,12 +128,9 @@ class RobocarsHatInCtrl(metaclass=Singleton):
         self.inAux2 = 0.0
         self.lastAux1 = -1.0
         self.lastAux2 = -1.0
-        self.recording=False
         self.autorecording=False
-        self.mode = 'user'
-        self.lane = self.AUX_VALUE_LANE_CENTER
         self.requested_lane = self.AUX_VALUE_LANE_CENTER
-        self.lastMode = self.mode
+        self.lastMode = 'user'
         self.applyBrake = 0
 
         if (self.cfg.ROBOCARSHAT_USE_AUTOCALIBRATION==True) :
@@ -230,18 +227,18 @@ class RobocarsHatInCtrl(metaclass=Singleton):
         recording=False
         user_throttle = self.inThrottle
         user_steering = self.inSteering
-
+        lane = self.AUX_VALUE_LANE_CENTER
         #Process features controlled by aux channels
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_RECORDandPILOT)
         if command != None :
             if (command<-0.5):
                 recording=True
-                self.mode='user'
+                mode='user'
             elif (command>0.5):
-                self.mode=self.cfg.ROBOCARSHAT_PILOT_MODE
+                mode=self.cfg.ROBOCARSHAT_PILOT_MODE
                 user_throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
             else:
-                self.mode='user'
+                mode='user'
 
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_AUTORECORD)
         if command != None :
@@ -250,7 +247,7 @@ class RobocarsHatInCtrl(metaclass=Singleton):
             elif (command>0.5):
                 self.autorecording=False
             else:
-                self.mode='user'
+                mode='user'
 
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_RECORD)
         if command != None :
@@ -260,7 +257,7 @@ class RobocarsHatInCtrl(metaclass=Singleton):
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_PILOT)
         if command != None :
             if command > 0.5:
-                self.mode='local_angle'
+                mode='local_angle'
                 user_throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
 
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_THROTTLEEXP)
@@ -310,12 +307,12 @@ class RobocarsHatInCtrl(metaclass=Singleton):
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_LANE_ANNOTATION)
         if command != None and has_changed:
             if command < -0.5:
-                self.lane = self.AUX_VALUE_LANE_LEFT
+                lane = self.AUX_VALUE_LANE_LEFT
             elif command > 0.5:
-                self.lane = self.AUX_VALUE_LANE_RIGHT
+                lane = self.AUX_VALUE_LANE_RIGHT
             else:
-                self.lane = self.AUX_VALUE_LANE_CENTER 
-            mylogger.info(f"CtrlIn Lane set to {self.lane}")
+                lane = self.AUX_VALUE_LANE_CENTER 
+            mylogger.info(f"CtrlIn Lane set to {lane}")
 
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_DRIVE_ON_LANE)
         if command != None and has_changed:
@@ -331,12 +328,12 @@ class RobocarsHatInCtrl(metaclass=Singleton):
         if self.cfg.ROBOCARSHAT_STEERING_FIX != None:
             user_steering = self.cfg.ROBOCARSHAT_STEERING_FIX
 
-        if (self.mode=='user' and self.cfg.ROBOCARSHAT_THROTTLE_FLANGER != None) :
+        if (mode=='user' and self.cfg.ROBOCARSHAT_THROTTLE_FLANGER != None) :
             user_throttle = dualMap(user_throttle,
                 -1, 0, 1,
                 self.cfg.ROBOCARSHAT_THROTTLE_FLANGER[0], 0, self.cfg.ROBOCARSHAT_THROTTLE_FLANGER[1])
 
-        if (self.mode=='user' and self.cfg.ROBOCARSHAT_THROTTLE_DISCRET != None) :
+        if (mode=='user' and self.cfg.ROBOCARSHAT_THROTTLE_DISCRET != None) :
             inds = np.digitize(user_throttle, self.discretesThrottle)
             inds = max(inds,1)
             inds = min(inds, len(self.cfg.ROBOCARSHAT_THROTTLE_DISCRET))
@@ -346,18 +343,18 @@ class RobocarsHatInCtrl(metaclass=Singleton):
                 recording=True
 
         #if switching back to user, then apply brake
-        if self.mode=='user' and self.lastMode != 'user' and self.cfg.ROBOCARSHAT_BRAKE_ON_IDLE_THROTTLE !=None:
+        if mode=='user' and self.lastMode != 'user' and self.cfg.ROBOCARSHAT_BRAKE_ON_IDLE_THROTTLE !=None:
             self.applyBrake=10 #brake duration
 
         if self.applyBrake>0:
             user_throttle = self.cfg.ROBOCARSHAT_BRAKE_ON_IDLE_THROTTLE
             self.applyBrake-=1
 
-        self.lastMode = self.mode
+        self.lastMode = mode
         self.lastAux1 = self.inAux1
         self.lastAux2 = self.inAux2
 
-        return user_throttle, user_steering, recording
+        return user_throttle, user_steering, mode, recording, lane
 
     def update(self):
 
@@ -370,14 +367,14 @@ class RobocarsHatInCtrl(metaclass=Singleton):
                 time.sleep(s)
 
     def run_threaded(self, throttle, angle, mode):
-        user_throttle, user_steering, recording = self.processAltModes ()
-        return user_steering, user_throttle, self.mode, recording, self.lane
+        user_throttle, user_steering, user_mode, recording, lane = self.processAltModes ()
+        return user_steering, user_throttle, user_mode, recording, lane
 
     def run (self, throttle, angle, mode):
         self.processCommand()
         self.mode = mode # Passthrough mode if needed
-        user_throttle, user_steering = self.processAltModes ()
-        return user_steering, user_throttle, self.mode, self.recording, self.lane
+        user_throttle, user_steering, user_mode, recording, lane = self.processAltModes ()
+        return user_steering, user_throttle, user_mode, recording, lane
     
 
     def shutdown(self):
