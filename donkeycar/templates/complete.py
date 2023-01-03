@@ -558,8 +558,8 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
     types += ['float', 'float']
 
     if cfg.OBSTACLE_DETECTOR:
-    inputs += ['obstacle/label', 'obstacle/coords']
-    types += ['str', 'str']
+        inputs += ['obstacle/label', 'obstacle/coords']
+        types += ['str', 'str']
 
 
     if cfg.HAVE_PERFMON:
