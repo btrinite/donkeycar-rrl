@@ -119,7 +119,7 @@ ROBOCARSHAT_ODOM_IN_MAX = 20000
 ### Localizer and drive on lane
 To enable Drive on lane :
 ```
-ROBOCARS_DRIVE_ON_LANE=True
+ROBOCARS_DRIVE_ON_LANE=False
 ROBOCARS_LOCALIZER_STEERING_ADJUST_STEPS=[0,0.2,0.4]
 ROBOCARS_LANE_MODEL=True
 ROBOCARS_NUM_LANE=3
@@ -150,6 +150,7 @@ Possible values are (as string) :
 - 'output_steering_exp' means special mode where aux ch is used to increment/decrement a fixed steering output to calibrate direction in user mode, resulting values must be reported in  ROBOCARSHAT_PWM_IN_STEERING_MIN and ROBOCARSHAT_PWM_IN_STEERING_MAX
 - 'lane_annotation' means special mode where aux ch is used to annotate on which lane the car is driving (as a 3 positions switch)
 - 'drive_on_lane' means special mode where channel value (as a 3 positions switch) is used to control on which lane the car must drive 
+- 'autorecord' means special mode where aux ch controls autorecording feature 
 
 ### record, pilot, record/pilot
 In this node, the aux channel is used to trigger pilot and/or recording.
