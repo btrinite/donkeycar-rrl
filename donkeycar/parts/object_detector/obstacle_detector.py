@@ -55,7 +55,7 @@ class ObstacleDetector(object):
                         obstacle_obj = obj
                         max_score = obj.score
 
-        if self.debug:
+        if obstacle_obj and self.debug:
             print(f"object {obstacle_obj.label_id} detected, score = {obstacle_obj.score}")
 
         # if traffic_light_obj:
