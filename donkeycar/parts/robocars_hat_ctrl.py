@@ -313,7 +313,7 @@ class RobocarsHatInCtrl(metaclass=Singleton):
                 self.lane = self.AUX_VALUE_LANE_RIGHT
             else:
                 self.lane = self.AUX_VALUE_LANE_CENTER 
-            mylogger.info(f"CtrlIn Lane set to {lane}")
+            mylogger.info(f"CtrlIn Lane set to {self.lane}")
 
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_DRIVE_ON_LANE)
         if command != None and has_changed:
