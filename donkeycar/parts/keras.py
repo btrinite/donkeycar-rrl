@@ -374,12 +374,12 @@ class KerasLinear(KerasPilot):
         throttle: float = record.underlying['user/throttle']
         y_trans = {'n_outputs0': angle, 'n_outputs1': throttle}
         if self.have_lane_loc:
-            lane: int = int(record.underlying['localizer/lane'])
+            lane: int = int(record.underlying['user/lane'])
             lane_one_hot = np.zeros(self.num_lane)
             lane_one_hot[lane] = 1
             y_trans.update({'n_outputs2': lane_one_hot})
         if self.have_turn_loc:
-            turn: int = int(record.underlying['localizer/turn'])
+            turn: int = int(record.underlying['user/turn'])
             turn_one_hot = np.zeros(self.num_turn)
             turn_one_hot[turn] = 1
             y_trans.update({'n_outputs3': turn_one_hot})

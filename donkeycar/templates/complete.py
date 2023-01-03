@@ -546,9 +546,9 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
             inputs += ['lidar/dist_array']
             types  += ['nparray']
 
-    if cfg.RECORD_DURING_AI:
-        inputs += ['pilot/angle', 'pilot/throttle']
-        types += ['float', 'float']
+    inputs += ['pilot/angle', 'pilot/throttle']
+    types += ['float', 'float']
+
 
     if cfg.HAVE_PERFMON:
         from donkeycar.parts.perfmon import PerfMonitor
@@ -563,11 +563,15 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
         types += ['int']
 
     if (cfg.ROBOCARS_LANE_MODEL):
-        inputs += ['localizer/lane']
+        inputs += ['user/lane']
+        types += ['int']
+        inputs += ['pilot/lane']
         types += ['int']
 
     if (cfg.ROBOCARS_TURN_MODEL):
-        inputs += ['localizer/turn']
+        inputs += ['user/turn']
+        types += ['int']
+        inputs += ['pilot/turn']
         types += ['int']
 
     # do we want to store new records into own dir or append to existing
@@ -685,7 +689,7 @@ def add_user_controller(V, cfg, use_joystick, input_image='cam/image_array'):
         inputs=['user/angle', 'user/throttle', 'user/mode']
         outputs=['user/angle', 'user/throttle', 'user/mode', 'recording']
         if (cfg.ROBOCARS_LANE_MODEL):
-            outputs += ['localizer/lane']
+            outputs += ['user/lane']
         V.add(ctr, inputs=inputs, outputs=outputs,threaded=False)
 
     return ctr
