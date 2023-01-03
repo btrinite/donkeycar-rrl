@@ -129,6 +129,7 @@ class RobocarsHatInCtrl(metaclass=Singleton):
         self.lastAux1 = -1.0
         self.lastAux2 = -1.0
         self.autorecording=False
+        self.lane = self.AUX_VALUE_LANE_CENTER
         self.requested_lane = self.AUX_VALUE_LANE_CENTER
         self.lastMode = 'user'
         self.applyBrake = 0
@@ -228,7 +229,6 @@ class RobocarsHatInCtrl(metaclass=Singleton):
         recording=False
         user_throttle = self.inThrottle
         user_steering = self.inSteering
-        lane = self.AUX_VALUE_LANE_CENTER
         #Process features controlled by aux channels
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_RECORDandPILOT)
         if command != None :
@@ -308,11 +308,11 @@ class RobocarsHatInCtrl(metaclass=Singleton):
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_LANE_ANNOTATION)
         if command != None and has_changed:
             if command < -0.5:
-                lane = self.AUX_VALUE_LANE_LEFT
+                self.lane = self.AUX_VALUE_LANE_LEFT
             elif command > 0.5:
-                lane = self.AUX_VALUE_LANE_RIGHT
+                self.lane = self.AUX_VALUE_LANE_RIGHT
             else:
-                lane = self.AUX_VALUE_LANE_CENTER 
+                self.lane = self.AUX_VALUE_LANE_CENTER 
             mylogger.info(f"CtrlIn Lane set to {lane}")
 
         command, has_changed = self.getAuxValuePerFeat(self.AUX_FEATURE_DRIVE_ON_LANE)
@@ -355,7 +355,7 @@ class RobocarsHatInCtrl(metaclass=Singleton):
         self.lastAux1 = self.inAux1
         self.lastAux2 = self.inAux2
 
-        return user_throttle, user_steering, mode, recording, lane
+        return user_throttle, user_steering, mode, recording, self.lane
 
     def update(self):
 
