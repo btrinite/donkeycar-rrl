@@ -51,7 +51,6 @@ class ObstacleDetector(object):
         if ans:
             for obj in ans:
                     if (obj.score > max_score):
-                        print(obj.bounding_box)
                         obstacle_obj = obj
                         max_score = obj.score
 
