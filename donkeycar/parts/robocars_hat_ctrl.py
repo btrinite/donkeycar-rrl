@@ -224,6 +224,7 @@ class RobocarsHatInCtrl(metaclass=Singleton):
             return None,None
 
     def processAltModes(self):
+        mode='user'
         recording=False
         user_throttle = self.inThrottle
         user_steering = self.inSteering
