@@ -50,12 +50,13 @@ class ObstacleDetector(object):
         obstacle_obj = None
         if ans:
             for obj in ans:
-                    if self.debug:
-                        print(f"object {obj.label_id} detected, score = {obj.score}")
                     if (obj.score > max_score):
                         print(obj.bounding_box)
                         obstacle_obj = obj
                         max_score = obj.score
+
+        if self.debug:
+            print(f"object {obstacle_obj.label_id} detected, score = {obstacle_obj.score}")
 
         # if traffic_light_obj:
         #     self.last_5_scores.append(traffic_light_obj.score)
