@@ -426,6 +426,14 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
               inputs=['pilot/throttle'],
               outputs=['pilot/throttle'])
 
+    if cfg.OBSTACLE_DETECTOR:
+        from donkeycar.parts.object_detector.obstacle_detector \
+            import ObstacleDetector
+        V.add(ObstacleDetector(cfg.OBSTACLE_MIN_SCORE,
+                               cfg.OBSTACLE_SHOW_BOUNDING_BOX),
+              inputs=['cam/image_array'],
+              outputs=[cam/image_array'])
+
     #
     # to give the car a boost when starting ai mode in a race.
     # This will also override the stop sign detector so that
