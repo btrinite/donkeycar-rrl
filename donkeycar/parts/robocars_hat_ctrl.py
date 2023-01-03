@@ -434,7 +434,7 @@ class RobocarsHatInOdom:
 #class RobocarsHatInBattery:
 
 lanelogger = init_special_logger ("LaneCtrl")
-lanelogger.setLevel(logging.DEBUG)
+lanelogger.setLevel(logging.INFO)
 
 class RobocarsHatLaneCtrl(metaclass=Singleton):
 
