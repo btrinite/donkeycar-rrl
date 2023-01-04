@@ -403,10 +403,11 @@ PRUNE_EVAL_PERCENT_OF_DATASET = .05  # percent of dataset used to perform evalua
 # Augmentations and Transformations
 AUGMENTATIONS = []
 TRANSFORMATIONS = []
-# Settings for brightness and blur, use 'MULTIPLY' and/or 'BLUR' in
+# Settings for brightness and blur, use 'MULTIPLY' and/or 'BLUR' and/or 'TEMP' in
 # AUGMENTATIONS
 AUG_MULTIPLY_RANGE = (0.5, 3.0)
 AUG_BLUR_RANGE = (0.0, 3.0)
+AUG_TEMP_RANGE = (2700, 5000)
 # Region of interest cropping, requires 'CROP' in TRANSFORMATIONS to be set
 # If these crops values are too large, they will cause the stride values to
 # become negative and the model with not be valid.
