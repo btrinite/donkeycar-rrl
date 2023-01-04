@@ -328,6 +328,7 @@ class KerasLinear(KerasPilot):
         self.have_turn_loc=have_turn_loc
         self.num_turn=num_turn_cat
         super().__init__(interpreter, input_shape)
+        logger.info(f'Created {self} with odom={have_odom}, lane={have_lane_loc}, turn={have_turn_loc}')
 
     def create_model(self):
         if self.have_odom:

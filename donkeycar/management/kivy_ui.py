@@ -751,6 +751,9 @@ class OverlayImage(FullImage):
         throttle = get_norm_value(
             record.underlying[self.throttle_field], config,
             rc_handler.field_properties[self.throttle_field])
+        speed=None
+        if (config.HAVE_ODOM):
+            speed = [record.underlying['enc/speed']]
         rgb = (0, 255, 0)
         MakeMovie.draw_line_into_image(angle, throttle, False, img_arr, rgb)
         if not self.pilot:
@@ -759,7 +762,7 @@ class OverlayImage(FullImage):
         output = (0, 0)
         try:
             # Not each model is supported in each interpreter
-            output = self.pilot.run(aug_img_arr)
+            output = self.pilot.run(aug_img_arr, speed)
         except Exception as e:
             Logger.error(e)
 
