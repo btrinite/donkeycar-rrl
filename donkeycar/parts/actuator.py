@@ -1223,6 +1223,9 @@ class RobocarsHat (metaclass=Singleton):
         if (RobocarsHat.fixSteering != None):
             pulse_steering = RobocarsHat.fixSteering
             
+        if (self.cfg.ROBOCARSHAT_PWM_OUT_STEERING_INVERT):
+            pulse_steering = -pulse_steering
+
         with RobocarsHat.robocarshat_lock:
             cmd=("1,%d,%d\n" % (int(pulse_throttle), int(pulse_steering))).encode('ascii')
             actlogger.debug("Tx CMD :{}".format(cmd))
