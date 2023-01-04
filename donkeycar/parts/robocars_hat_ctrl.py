@@ -218,9 +218,9 @@ class RobocarsHatInCtrl(metaclass=Singleton):
 
     def getAuxValuePerFeat(self, feature):
         if self.aux1Feature == feature:
-            return self.inAux1, abs(self.lastAux1 - self.inAux1)>0.5
+            return self.inAux1, abs(self.lastAux1 - self.inAux1)>0.3
         elif self.aux2Feature == feature:
-            return self.inAux2, abs(self.lastAux2 - self.inAux2)>0.5
+            return self.inAux2, abs(self.lastAux2 - self.inAux2)>0.3
         else:
             return None,None
 
