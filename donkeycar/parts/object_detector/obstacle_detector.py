@@ -101,7 +101,7 @@ class ObstacleDetector(object):
         label="--"
         coords="--"
         if obstacle_obj:
-            label = self.labels[obstacle_obj.label_id]
+            label = f"{self.labels[obstacle_obj.label_id] ({obstacle_obj.score})}"
             coords = f"{obstacle_obj.bounding_box[0][0]},{obstacle_obj.bounding_box[1][0]},{obstacle_obj.bounding_box[0][1]},{obstacle_obj.bounding_box[1][1]}"
             if self.show_bounding_box and obstacle_obj != None:
                 self.draw_bounding_box(obstacle_obj, img_arr)
