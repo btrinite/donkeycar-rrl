@@ -468,7 +468,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
     def processLane(self,throttle, angle, mode, lane, turn):
 
         if mode != 'user' and lane!=None:
-                    requested_lane = self.hatInCtrl.getRequestedLane()
+            requested_lane = self.hatInCtrl.getRequestedLane()
 
             if self.cfg.ROBOCARS_DRIVE_ON_TURN and turn:
                 lanelogger.debug(f"LaneCtrl lane predict:{self.LANE_LABEL[lane]}, turn predict:{self.TURN_LABEL[turn]}/{turn}")
