@@ -78,6 +78,7 @@ try:
 
     class ImageAugmentation:
         def __init__(self, cfg, key):
+            logger.info(f'Creating ImageAugmentation for {key}')
             aug_list = getattr(cfg, key, [])
             augmentations = \
                 [ImageAugmentation.create(a, cfg) for a in aug_list]
@@ -121,6 +122,11 @@ try:
                 interval = getattr(config, 'AUG_BLUR_RANGE', (0.0, 3.0))
                 logger.info(f'Creating augmentation {aug_type} {interval}')
                 return iaa.GaussianBlur(sigma=interval)
+            
+            elif aug_type == 'TEMP':
+                interval = getattr(config, 'AUG_TEMP_RANGE', (2700, 5000))
+                logger.info(f'Creating augmentation {aug_type} {interval}')
+                return iaa.ChangeColorTemperature (kelvin=interval)
 
         # Parts interface
         def run(self, img_arr):

@@ -16,6 +16,9 @@ from donkeycar.pipeline.augmentations import ImageAugmentation
 from donkeycar.utils import get_model_by_type, normalize_image, train_test_split
 import tensorflow as tf
 import numpy as np
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 class BatchSequence(object):
@@ -34,7 +37,8 @@ class BatchSequence(object):
         self.sequence = TubSequence(records)
         self.batch_size = self.config.BATCH_SIZE
         self.is_train = is_train
-        self.augmentation = ImageAugmentation(config, 'AUGMENTATIONS')
+        if self.is_train:
+            self.augmentation = ImageAugmentation(config, 'AUGMENTATIONS')
         self.transformation = ImageAugmentation(config, 'TRANSFORMATIONS')
         self.pipeline = self._create_pipeline()
 
