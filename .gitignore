@@ -27,3 +27,6 @@ htmlcov/
 # PyTorch
 lightning_logs
 tb_logs
+
+#pyenv
+.pyenv
