@@ -19,6 +19,10 @@ class ObstacleDetector(object):
     '''
 
     def __init__(self, min_score, show_bounding_box, debug=False):
+
+        #MODEL_URL = "https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite"
+        #LABEL_URL = "https://dl.google.com/coral/canned_models/coco_labels.txt"
+
         MODEL_FILE_NAME = "edgetpu/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite"
         LABEL_FILE_NAME = "edgetpu/coco_labels.txt"
 

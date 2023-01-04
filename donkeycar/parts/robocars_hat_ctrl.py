@@ -49,14 +49,15 @@ class RobocarsHatIn(metaclass=Singleton):
         if cmds != None and len(cmds)>0:
             for l in cmds:
                 params = l.split(',')
-                if len(params) == 5 and int(params[0])==1 : # Radio CHannels
-                    self.last_rxch_msg = l
-                if len(params) == 3 and int(params[0])==3 : # Calibration
-                    self.last_calibration_msg = l
-                if len(params) == 3 and int(params[0])==2 : # Sensors
-                    self.last_sensors_msg = l
-                if len(params) == 5 and int(params[0])==0 : # Battery
-                    self.last_battery_msg = l
+                if params[0].isnumeric:
+                    if len(params) == 5 and int(params[0])==1 : # Radio CHannels
+                        self.last_rxch_msg = l
+                    if len(params) == 3 and int(params[0])==3 : # Calibration
+                        self.last_calibration_msg = l
+                    if len(params) == 3 and int(params[0])==2 : # Sensors
+                        self.last_sensors_msg = l
+                    if len(params) == 5 and int(params[0])==0 : # Battery
+                        self.last_battery_msg = l
 
     def getRxCh(self):
         self.getCommand()
