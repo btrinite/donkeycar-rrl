@@ -467,11 +467,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
 
     def processLane(self,throttle, angle, mode, lane, turn):
 
-        if mode != 'user' and lane :
-
-            requested_lane = self.LANE_CENTER
-            if self.cfg.ROBOCARS_DRIVE_ON_LANE:
-                if self.hatInCtrl:
+        if mode != 'user' and lane!=None:
                     requested_lane = self.hatInCtrl.getRequestedLane()
 
             if self.cfg.ROBOCARS_DRIVE_ON_TURN and turn:
