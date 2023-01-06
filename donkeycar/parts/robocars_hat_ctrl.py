@@ -50,6 +50,8 @@ class RobocarsHatIn(metaclass=Singleton):
             for l in cmds:
                 params = l.split(',')
                 if params[0].isnumeric:
+                    if len(params) != 5 and int(params[0])==1 : # Radio CHannels
+                        mylogger.info(f"Got msg 1 with wrong parameters number : {len(params)} {params}")
                     if len(params) == 5 and int(params[0])==1 : # Radio CHannels
                         self.last_rxch_msg = l
                     if len(params) == 3 and int(params[0])==3 : # Calibration
@@ -496,7 +498,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                 throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
                 if (turn==self.TURN_STRAIGHT_LINE):
                     throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
-                    print("Arm Brake")
+                    lanelogger.debug("Arm Brake")
                     self.applyBrake=0
 
                 if (turn==self.TURN_BRAKE_RIGHT_TURN or 
@@ -504,7 +506,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                         turn==self.TURN_LEFT_TURN or
                         turn==self.TURN_RIGHT_TURN):
                     if self.applyBrake==0:
-                        print("Charge Brake")
+                        lanelogger.debug("Charge Brake")
                         self.applyBrake=self.cfg.ROBOCARS_DRIVE_ON_TURN_BRAKE_DURATION #brake duration
 
             else:
@@ -512,7 +514,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
 
 
             if self.applyBrake>0:
-                print(f"Apply Brake...{self.applyBrake}")
+                lanelogger.debug(f"Apply Brake...{self.applyBrake}")
                 throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
                 self.applyBrake-=1
                 if self.applyBrake==0:
