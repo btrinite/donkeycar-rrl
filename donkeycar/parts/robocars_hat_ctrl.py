@@ -498,7 +498,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                     throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
                 if (turn==self.TURN_BRAKE_RIGHT_TURN or turn==self.TURN_BRAKE_LEFT_TURN):
                     if self.applyBrake==0:
-                        self.applyBrake=2 #brake duration
+                        self.applyBrake=self.cfg.ROBOCARS_DRIVE_ON_TURN_BRAKE_DURATION #brake duration
                 else:
                         self.applyBrake=0
 
