@@ -472,51 +472,51 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
     def processLane(self,throttle, angle, mode, lane, turn):
 
         if mode != 'user' and lane!=None:
-            requested_lane = self.hatInCtrl.getRequestedLane()
+
+            if self.cfg.ROBOCARS_DRIVE_ON_LANE:
+                requested_lane = self.hatInCtrl.getRequestedLane() # Get Lane from RC
+            else:
+                requested_lane = self.LANE_CENTER # default.
+
+            lanelogger.debug(f"LaneCtrl: lane predict:{self.LANE_LABEL[lane]}")
 
             if self.cfg.ROBOCARS_DRIVE_ON_TURN and turn!=None:
-                lanelogger.debug(f"LaneCtrl lane predict:{self.LANE_LABEL[lane]}, turn predict:{self.TURN_LABEL[turn]}/{turn}")
                 # Select lane based on turn prediction
-                if turn == self.TURN_BRAKE_RIGHT_TURN: #next to turn on the right, switch on left lane
-                    if self.cfg.ROBOCARS_DRIVE_ON_TURN_BRAKE_ONLY:
-                        requested_lane = self.LANE_CENTER 
-                    else:
-                        requested_lane = self.LANE_LEFT 
-                elif turn == self.TURN_RIGHT_TURN:  #inside turn on the right, keep on right lane
-                    requested_lane = self.LANE_RIGHT 
-                elif turn == self.TURN_BRAKE_LEFT_TURN: #next to turn on the left, switch on right lane
-                    if self.cfg.ROBOCARS_DRIVE_ON_TURN_BRAKE_ONLY:
-                        requested_lane = self.LANE_CENTER 
-                    else:
+                lanelogger.debug(f"LaneCtrl : turn predict:{self.TURN_LABEL[turn]}/{turn}")
+ 
+                if not self.cfg.ROBOCARS_DRIVE_ON_TURN_BRAKE_ONLY: # Change lane based on turn prediction
+                    if turn == self.TURN_BRAKE_RIGHT_TURN: #next to turn on the right, switch on left lane
+                        requested_lane = self.LANE_LEFT         
+                    elif turn == self.TURN_RIGHT_TURN:  #inside turn on the right, keep on right lane
+                        requested_lane = self.LANE_RIGHT 
+                    elif turn == self.TURN_BRAKE_LEFT_TURN: #next to turn on the left, switch on right lane
                         requested_lane = self.LANE_RIGHT
-                elif turn == self.TURN_LEFT_TURN: #inside turn on the left, kepp on left lane
-                    requested_lane = self.LANE_LEFT
-                else:
-                    requested_lane = self.LANE_CENTER
+                    elif turn == self.TURN_LEFT_TURN: #inside turn on the left, kepp on left lane
+                        requested_lane = self.LANE_LEFT
+                    else:
+                        requested_lane = self.LANE_CENTER
 
                 # Select throttle based on turn prediction
                 throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
                 if (turn==self.TURN_STRAIGHT_LINE):
                     throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
-                    lanelogger.debug("Arm Brake")
+                    lanelogger.debug("LaneCtrl: Arm Brake")
                     self.applyBrake=0
 
+                # If brake is armed, apply brake once when reaching turn 
                 if (turn==self.TURN_BRAKE_RIGHT_TURN or 
                         turn==self.TURN_BRAKE_LEFT_TURN or
                         turn==self.TURN_LEFT_TURN or
                         turn==self.TURN_RIGHT_TURN):
                     if self.applyBrake==0:
-                        lanelogger.debug("Charge Brake")
+                        lanelogger.debug("LaneCtrl: Trigger Brake")
                         self.applyBrake=self.cfg.ROBOCARS_DRIVE_ON_TURN_BRAKE_DURATION #brake duration
 
-            else:
-                lanelogger.debug(f"LaneCtrl lane predict:{self.LANE_LABEL[lane]}")
-
-
             if self.applyBrake>0:
-                lanelogger.debug(f"Apply Brake...{self.applyBrake}")
+                lanelogger.debug(f"LaneCtrl: Brake cycle {self.applyBrake}")
                 throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
                 self.applyBrake-=1
+                # If break is done, disarm it.
                 if self.applyBrake==0:
                     self.applyBrake=-1
 
