@@ -464,6 +464,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
         self.steering = 0
         self.lane = 0
         self.on = True
+        self.applyBrake = 0
         lanelogger.info('starting RobocarsHatLaneCtrl Hat Controller')
 
     def processLane(self,throttle, angle, mode, lane, turn):
@@ -496,9 +497,14 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                 if (turn==self.TURN_STRAIGHT_LINE):
                     throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
                 if (turn==self.TURN_BRAKE_RIGHT_TURN or turn==self.TURN_BRAKE_LEFT_TURN):
-                    throttle= self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
+                    self.applyBrake=2 #brake duration
             else:
                 lanelogger.debug(f"LaneCtrl lane predict:{self.LANE_LABEL[lane]}")
+
+
+            if self.applyBrake>0:
+                throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
+                self.applyBrake-=1
 
             lanelogger.debug(f"LaneCtrl     -> requested lane: {self.LANE_LABEL[requested_lane]}/{requested_lane}")      
             # Adjust car steering to the reauested lane
