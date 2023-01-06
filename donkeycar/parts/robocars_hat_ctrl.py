@@ -464,7 +464,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
         self.steering = 0
         self.lane = 0
         self.on = True
-        self.applyBrake = 0
+        self.applyBrake = -1
         lanelogger.info('starting RobocarsHatLaneCtrl Hat Controller')
 
     def processLane(self,throttle, angle, mode, lane, turn):
@@ -472,7 +472,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
         if mode != 'user' and lane!=None:
             requested_lane = self.hatInCtrl.getRequestedLane()
 
-            if self.cfg.ROBOCARS_DRIVE_ON_TURN and turn:
+            if self.cfg.ROBOCARS_DRIVE_ON_TURN and turn!=None:
                 lanelogger.debug(f"LaneCtrl lane predict:{self.LANE_LABEL[lane]}, turn predict:{self.TURN_LABEL[turn]}/{turn}")
                 # Select lane based on turn prediction
                 if turn == self.TURN_BRAKE_RIGHT_TURN: #next to turn on the right, switch on left lane
@@ -493,24 +493,30 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                     requested_lane = self.LANE_CENTER
 
                 # Select throttle based on turn prediction
-                self.throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
+                throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
                 if (turn==self.TURN_STRAIGHT_LINE):
                     throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
-                if (turn==self.TURN_BRAKE_RIGHT_TURN or turn==self.TURN_BRAKE_LEFT_TURN):
+                    print("Arm Brake")
+                    self.applyBrake=0
+
+                if (turn==self.TURN_BRAKE_RIGHT_TURN or 
+                        turn==self.TURN_BRAKE_LEFT_TURN or
+                        turn==self.TURN_LEFT_TURN or
+                        turn==self.TURN_RIGHT_TURN):
                     if self.applyBrake==0:
+                        print("Charge Brake")
                         self.applyBrake=self.cfg.ROBOCARS_DRIVE_ON_TURN_BRAKE_DURATION #brake duration
-                else:
-                        self.applyBrake=0
 
             else:
                 lanelogger.debug(f"LaneCtrl lane predict:{self.LANE_LABEL[lane]}")
 
 
             if self.applyBrake>0:
+                print(f"Apply Brake...{self.applyBrake}")
                 throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
                 self.applyBrake-=1
-            else:
-                self.applyBrake=-1
+                if self.applyBrake==0:
+                    self.applyBrake=-1
 
 
             lanelogger.debug(f"LaneCtrl     -> requested lane: {self.LANE_LABEL[requested_lane]}/{requested_lane}")      
