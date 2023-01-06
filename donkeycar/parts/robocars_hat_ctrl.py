@@ -475,11 +475,17 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
                 lanelogger.debug(f"LaneCtrl lane predict:{self.LANE_LABEL[lane]}, turn predict:{self.TURN_LABEL[turn]}/{turn}")
                 # Select lane based on turn prediction
                 if turn == self.TURN_BRAKE_RIGHT_TURN: #next to turn on the right, switch on left lane
-                    requested_lane = self.LANE_LEFT 
+                    if self.cfg.ROBOCARS_DRIVE_ON_TURN_BRAKE_ONLY:
+                        requested_lane = self.LANE_CENTER 
+                    else:
+                        requested_lane = self.LANE_LEFT 
                 elif turn == self.TURN_RIGHT_TURN:  #inside turn on the right, keep on right lane
                     requested_lane = self.LANE_RIGHT 
                 elif turn == self.TURN_BRAKE_LEFT_TURN: #next to turn on the left, switch on right lane
-                    requested_lane = self.LANE_RIGHT
+                    if self.cfg.ROBOCARS_DRIVE_ON_TURN_BRAKE_ONLY:
+                        requested_lane = self.LANE_CENTER 
+                    else:
+                        requested_lane = self.LANE_RIGHT
                 elif turn == self.TURN_LEFT_TURN: #inside turn on the left, kepp on left lane
                     requested_lane = self.LANE_LEFT
                 else:

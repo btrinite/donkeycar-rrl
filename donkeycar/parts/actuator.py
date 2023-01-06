@@ -1273,6 +1273,7 @@ class RobocarsHat (metaclass=Singleton):
                     if (len(battery)>0) :
                         last_received.append(battery[-1].rstrip())
                     if (len(alarm)>0) :
+                        actlogger.debug(f"Rx Alarm :{alarm}")
                         last_received.append(alarm[-1].rstrip())
                     #If the Arduino sends lots of empty lines, you'll lose the
                     #last filled line, so you could make the above statement conditional
