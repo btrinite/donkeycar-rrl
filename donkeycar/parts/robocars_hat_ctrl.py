@@ -476,7 +476,7 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
             if self.cfg.ROBOCARS_DRIVE_ON_LANE:
                 requested_lane = self.hatInCtrl.getRequestedLane() # Get Lane from RC
             else:
-                requested_lane = self.LANE_CENTER # default.
+                requested_lane = self.cfg.DEFAULT_LANE_CENTER # default.
 
             lanelogger.debug(f"LaneCtrl: lane predict:{self.LANE_LABEL[lane]}")
 
