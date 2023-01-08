@@ -9,6 +9,7 @@ from pycoral.adapters import common
 from pycoral.utils.dataset import read_label_file
 from pycoral.utils.edgetpu import make_interpreter
 from PIL import Image
+from PIL import ImageDraw
 from matplotlib import cm
 import os
 import logging
@@ -53,7 +54,10 @@ class ObstacleDetector(object):
 
     def convertImageArrayToPILImage(self, img_arr):
         img = Image.fromarray(img_arr.astype('uint8'), 'RGB')
+        return img
 
+    def convertPILToImageArray(self, img_pil):
+        img = np.array(img_pil) 
         return img
 
     '''
@@ -116,6 +120,6 @@ class ObstacleDetector(object):
             coords = f"{obstacle_obj.bbox.xmin},{obstacle_obj.bbox.ymin},{obstacle_obj.bbox.xmax},{obstacle_obj.bbox.ymax}"
             if self.show_bounding_box and obstacle_obj != None:
                 self.draw_objects(ImageDraw.Draw(pil_img), [obstacle_obj], self.labels)
-                return pil_img, label, coords, 
+                return self.convertPILToImageArray(pil_img), label, coords, 
             
         return img_arr, label, coords, 
