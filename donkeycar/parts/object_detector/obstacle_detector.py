@@ -97,7 +97,7 @@ class ObstacleDetector(object):
         cv2.rectangle(img_arr, (xmin, xmax),
                         (ymin, ymax), (0, 255, 0), 2)
 
-    def draw_objects(draw, objs, labels):
+    def draw_objects(self, draw, objs, labels):
         for obj in objs:
             bbox = obj.bbox
             draw.rectangle([(bbox.xmin, bbox.ymin), (bbox.xmax, bbox.ymax)],
