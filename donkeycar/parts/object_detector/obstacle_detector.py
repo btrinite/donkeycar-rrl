@@ -105,7 +105,7 @@ class ObstacleDetector(object):
         if obstacle_obj:
             label = f"{self.labels.get(obstacle_obj.id, obstacle_obj.id)} ({obstacle_obj.score})"
             coords = f"{obstacle_obj.bbox.xmin},{obstacle_obj.bbox.ymin},{obstacle_obj.bbox.xmax},{obstacle_obj.bbox.ymax}"
-            if self.show_bounding_ansbox and obstacle_obj != None:
+            if self.show_bounding_box and obstacle_obj != None:
                 self.draw_bounding_box(obstacle_obj, img_arr)
             
         return img_arr, label, coords, 
