@@ -4,6 +4,7 @@ import time
 import random
 import collections
 from pycoral.adapters import classify
+from pycoral.adapters import detect
 from pycoral.adapters import common
 from pycoral.utils.dataset import read_label_file
 from pycoral.utils.edgetpu import make_interpreter
@@ -60,15 +61,15 @@ class ObstacleDetector(object):
     '''
     def detect_obstacle (self, img_arr):
         img = self.convertImageArrayToPILImage(img_arr)
-        resized_image = img.convert('RGB').resize(self.size, Image.ANTIALIAS)
-        common.set_input(self.interpreter, resized_image)
+        _, scale = common.set_resized_input(
+            self.interpreter, img.size, lambda size: img.resize(size, Image.ANTIALIAS))
         self.interpreter.invoke()
-        classes = classify.get_classes(self.interpreter, top_k=3, score_threshold=self.min_score)
+        objects = detect.get_objects(self.interpreter, score_threshold=self.min_score, image_scale=scale)
 
         max_score = 0
         obstacle_obj = None
-        if classes:
-            for obj in classes:
+        if objects:
+            for obj in objects:
                     if (obj.score > max_score):
                         obstacle_obj = obj
                         max_score = obj.score
