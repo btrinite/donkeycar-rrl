@@ -11,6 +11,11 @@ from PIL import Image
 from matplotlib import cm
 import os
 
+from donkeycar.utilities.logger import init_special_logger
+
+lanelogger = init_special_logger ("Obstacle")
+lanelogger.setLevel(logging.INFO)
+
 
 class ObstacleDetector(object):
     '''
@@ -33,10 +38,11 @@ class ObstacleDetector(object):
         self.interpreter = make_interpreter(MODEL_FILE_NAME)
         self.interpreter.allocate_tensors()
 
+        lanelogger.info(f"Obstacle detector model loaded.")
         if common.input_details(self.interpreter, 'dtype') != np.uint8:
             raise ValueError('Only support uint8 input type.')
 
-        self.size = common.input_size(interpreter)
+        self.size = common.input_size(self.interpreter)
 
         self.last_5_scores = collections.deque(np.zeros(5), maxlen=5)
 
@@ -112,7 +118,7 @@ class ObstacleDetector(object):
         if obstacle_obj:
             label = f"{self.labels[obstacle_obj.label_id]} ({obstacle_obj.score})"
             coords = f"{obstacle_obj.bounding_box[0][0]},{obstacle_obj.bounding_box[1][0]},{obstacle_obj.bounding_box[0][1]},{obstacle_obj.bounding_box[1][1]}"
-            if self.show_bounding_box and obstacle_obj != None:
+            if self.show_bounding_ansbox and obstacle_obj != None:
                 self.draw_bounding_box(obstacle_obj, img_arr)
             
         return img_arr, label, coords, 
