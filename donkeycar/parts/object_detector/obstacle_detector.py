@@ -80,18 +80,18 @@ class ObstacleDetector(object):
         return obstacle_obj
 
     def draw_bounding_box(self, obstacle_obj, img_arr):
-        xmargin = (obstacle_obj.bounding_box[1][0] - obstacle_obj.bounding_box[0][0]) *0.1
+        xmargin = (obstacle_obj.bbox.xmax - obstacle_obj.bbox.xmin) *0.1
 
-        obstacle_obj.bounding_box[0][0] = obstacle_obj.bounding_box[0][0] + xmargin
-        obstacle_obj.bounding_box[1][0] = obstacle_obj.bounding_box[1][0] - xmargin
+        obstacle_obj.bbox.xmin = obstacle_obj.bbox.xmin + xmargin
+        obstacle_obj.bbox.xmax = obstacle_obj.bbox.xmax - xmargin
 
-        ymargin = (obstacle_obj.bounding_box[1][1] - obstacle_obj.bounding_box[0][1]) *0.05
+        ymargin = (obstacle_obj.bbox.ymax - obstacle_obj.bbox.ymin) *0.05
 
-        obstacle_obj.bounding_box[0][1] = obstacle_obj.bounding_box[0][1] + ymargin
-        obstacle_obj.bounding_box[1][1] = obstacle_obj.bounding_box[1][1] - ymargin
+        obstacle_obj.bbox.ymin = obstacle_obj.bbox.ymin + ymargin
+        obstacle_obj.bbox.ymax = obstacle_obj.bbox.ymax - ymargin
 
-        cv2.rectangle(img_arr, tuple(obstacle_obj.bounding_box[0].astype(int)),
-                        tuple(obstacle_obj.bounding_box[1].astype(int)), (0, 255, 0), 2)
+        cv2.rectangle(img_arr, (obstacle_obj.bbox.xmin, obstacle_obj.bbox.xmax),
+                        (obstacle_obj.bbox.ymin, obstacle_obj.bbox.ymax), (0, 255, 0), 2)
 
     def run(self, img_arr):
         if img_arr is None:
