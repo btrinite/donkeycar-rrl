@@ -3,8 +3,10 @@ import cv2
 import time
 import random
 import collections
-from edgetpu.detection.engine import DetectionEngine
-from edgetpu.utils import dataset_utils
+from pycoral.adapters import classify
+from pycoral.adapters import common
+from pycoral.utils.dataset import read_label_file
+from pycoral.utils.edgetpu import make_interpreter
 from PIL import Image
 from matplotlib import cm
 import os
@@ -26,9 +28,17 @@ class ObstacleDetector(object):
         MODEL_FILE_NAME = "edgetpu/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite"
         LABEL_FILE_NAME = "edgetpu/coco_labels.txt"
 
+        self.labels = read_label_file(LABEL_FILE_NAME)
+
+        self.interpreter = make_interpreter(MODEL_FILE_NAME)
+        self.interpreter.allocate_tensors()
+
+        if common.input_details(self.interpreter, 'dtype') != np.uint8:
+            raise ValueError('Only support uint8 input type.')
+
+        self.size = common.input_size(interpreter)
+
         self.last_5_scores = collections.deque(np.zeros(5), maxlen=5)
-        self.engine = DetectionEngine(MODEL_FILE_NAME)
-        self.labels = dataset_utils.read_label_file(LABEL_FILE_NAME)
 
         self.min_score = min_score
         self.show_bounding_box = show_bounding_box
@@ -44,16 +54,15 @@ class ObstacleDetector(object):
     '''
     def detect_obstacle (self, img_arr):
         img = self.convertImageArrayToPILImage(img_arr)
+        resized_image = img.convert('RGB').resize(size, Image.ANTIALIAS)
+        common.set_input(self.interpreter, resized_image)
+        self.interpreter.invoke()
+        classes = classify.get_classes(self.interpreter, top_k=3, threshold=self.min_score)
 
-        ans = self.engine.detect_with_image(img,
-                                          threshold=self.min_score,
-                                          keep_aspect_ratio=True,
-                                          relative_coord=False,
-                                          top_k=3)
         max_score = 0
         obstacle_obj = None
-        if ans:
-            for obj in ans:
+        if classes:
+            for obj in classes:
                     if (obj.score > max_score):
                         obstacle_obj = obj
                         max_score = obj.score
