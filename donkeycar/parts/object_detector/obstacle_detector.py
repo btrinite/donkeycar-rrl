@@ -10,7 +10,7 @@ from pycoral.utils.edgetpu import make_interpreter
 from PIL import Image
 from matplotlib import cm
 import os
-
+import logging
 from donkeycar.utilities.logger import init_special_logger
 
 lanelogger = init_special_logger ("Obstacle")
