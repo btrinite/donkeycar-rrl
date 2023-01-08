@@ -77,7 +77,7 @@ class ObstacleDetector(object):
         if obstacle_obj and self.debug:
             print(f"object {self.labels.get(obstacle_obj.id, obstacle_obj.id)} detected, score = {obstacle_obj.score}")
 
-        return obstacle_obj
+        return img, obstacle_obj
 
     def draw_bounding_box(self, obstacle_obj, img_arr):
         xmargin = (obstacle_obj.bbox.xmax - obstacle_obj.bbox.xmin) *0.1
@@ -107,7 +107,7 @@ class ObstacleDetector(object):
             return img_arr
 
         # Detect traffic light object
-        obstacle_obj = self.detect_obstacle(img_arr)
+        pil_img, obstacle_obj = self.detect_obstacle(img_arr)
 
         label="--"
         coords="--"
@@ -115,7 +115,7 @@ class ObstacleDetector(object):
             label = f"{self.labels.get(obstacle_obj.id, obstacle_obj.id)} ({obstacle_obj.score})"
             coords = f"{obstacle_obj.bbox.xmin},{obstacle_obj.bbox.ymin},{obstacle_obj.bbox.xmax},{obstacle_obj.bbox.ymax}"
             if self.show_bounding_box and obstacle_obj != None:
-                image = img_arr.convert('RGB')
-                draw_objects(ImageDraw.Draw(image), [obstacle_obj], self.labels)
+                self.draw_objects(ImageDraw.Draw(pil_img), [obstacle_obj], self.labels)
+                return pil_img, label, coords, 
             
         return img_arr, label, coords, 
