@@ -74,21 +74,7 @@ class ObstacleDetector(object):
                         max_score = obj.score
 
         if obstacle_obj and self.debug:
-            print(f"object {obstacle_obj.label_id} detected, score = {obstacle_obj.score}")
-
-        # if traffic_light_obj:
-        #     self.last_5_scores.append(traffic_light_obj.score)
-        #     sum_of_last_5_score = sum(list(self.last_5_scores))
-        #     # print("sum of last 5 score = ", sum_of_last_5_score)
-
-        #     if sum_of_last_5_score > self.LAST_5_SCORE_THRESHOLD:
-        #         return traffic_light_obj
-        #     else:
-        #         print("Not reaching last 5 score threshold")
-        #         return None
-        # else:
-        #     self.last_5_scores.append(0)
-        #     return None
+            print(f"object {self.labels.get(obstacle_obj.id, obstacle_obj.id)} detected, score = {obstacle_obj.score}")
 
         return obstacle_obj
 
@@ -116,7 +102,7 @@ class ObstacleDetector(object):
         label="--"
         coords="--"
         if obstacle_obj:
-            label = f"{self.labels[obstacle_obj.label_id]} ({obstacle_obj.score})"
+            label = f"{self.labels.get(obstacle_obj.id, obstacle_obj.id)} ({obstacle_obj.score})"
             coords = f"{obstacle_obj.bounding_box[0][0]},{obstacle_obj.bounding_box[1][0]},{obstacle_obj.bounding_box[0][1]},{obstacle_obj.bounding_box[1][1]}"
             if self.show_bounding_ansbox and obstacle_obj != None:
                 self.draw_bounding_box(obstacle_obj, img_arr)
