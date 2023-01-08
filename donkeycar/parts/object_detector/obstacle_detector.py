@@ -60,7 +60,7 @@ class ObstacleDetector(object):
     '''
     def detect_obstacle (self, img_arr):
         img = self.convertImageArrayToPILImage(img_arr)
-        resized_image = img.convert('RGB').resize(size, Image.ANTIALIAS)
+        resized_image = img.convert('RGB').resize(self.size, Image.ANTIALIAS)
         common.set_input(self.interpreter, resized_image)
         self.interpreter.invoke()
         classes = classify.get_classes(self.interpreter, top_k=3, threshold=self.min_score)
