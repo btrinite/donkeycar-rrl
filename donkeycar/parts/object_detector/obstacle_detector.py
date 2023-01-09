@@ -31,8 +31,10 @@ class ObstacleDetector(object):
 
         #MODEL_URL = "https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite"
         #LABEL_URL = "https://dl.google.com/coral/canned_models/coco_labels.txt"
+        #https://raw.githubusercontent.com/google-coral/test_data/master/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite
+        #https://raw.githubusercontent.com/google-coral/test_data/master/coco_labels.txt
 
-        MODEL_FILE_NAME = "edgetpu/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite"
+        MODEL_FILE_NAME = "edgetpu/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite"
         LABEL_FILE_NAME = "edgetpu/coco_labels.txt"
 
         self.labels = read_label_file(LABEL_FILE_NAME)
@@ -118,7 +120,7 @@ class ObstacleDetector(object):
         if obstacle_obj:
             label = f"{self.labels.get(obstacle_obj.id, obstacle_obj.id)} ({obstacle_obj.score})"
             coords = f"{obstacle_obj.bbox.xmin},{obstacle_obj.bbox.ymin},{obstacle_obj.bbox.xmax},{obstacle_obj.bbox.ymax}"
-            if self.show_bounding_box and obstacle_obj != None:
+            if self.show_bounding_box :
                 self.draw_objects(ImageDraw.Draw(pil_img), [obstacle_obj], self.labels)
                 return self.convertPILToImageArray(pil_img), label, coords, 
             
