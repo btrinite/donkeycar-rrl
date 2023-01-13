@@ -119,14 +119,14 @@ class ObstacleDetector(object):
         if obstacle:
             label = f"{self.labels.get(obstacle.id, obstacle.id)} ({obstacle.score})"
 
-        return left_img
+        return left_img, label
 
     def run(self, img_arr, full_img_arr):
         if img_arr is None:
             return img_arr
 
         # Detect traffic light object
-        left_img = self.detect_obstacle(img_arr)
+        left_img, labels = self.detect_obstacle(full_img_arr if full_img_arr!=None else img_arr)
 
             
         return img_arr, label 
