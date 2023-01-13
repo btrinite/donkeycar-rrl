@@ -27,7 +27,7 @@ class ObstacleDetector(object):
     We are just using a pre-trained model (MobileNet V2 SSD) provided by Google.
     '''
 
-    def __init__(self, min_score, show_bounding_box, debug=False):
+    def __init__(self, cfg, debug=False):
 
         #MODEL_URL = "https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite"
         #LABEL_URL = "https://dl.google.com/coral/canned_models/coco_labels.txt"
@@ -50,8 +50,9 @@ class ObstacleDetector(object):
 
         self.last_5_scores = collections.deque(np.zeros(5), maxlen=5)
 
-        self.min_score = min_score
-        self.show_bounding_box = show_bounding_box
+        self.cfg = cfg          
+        self.min_score = self.cfg.OBSTACLE_MIN_SCORE
+        self.show_bounding_box = self.cfg.OBSTACLE_SHOW_BOUNDING_BOX
         self.debug = debug
 
     def convertImageArrayToPILImage(self, img_arr):
