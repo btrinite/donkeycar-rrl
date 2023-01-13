@@ -482,23 +482,23 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
     def processLane(self, throttle, angle, mode, lane, acc):
 
 
-        if self.machine.is_stopped():
+        if self.machine.is_stopped(allow_substates=True):
             if (mode != 'user') :
                 self.machine.drive()
 
-        if self.machine.is_driving():
+        if self.machine.is_driving(allow_substates=True):
             if (mode == 'user') :
                 self.machine.stop()
 
-        if self.machine.is_driving_regularspeed():
+        if self.machine.is_driving_regularspeed(allow_substates=True):
             if (acc and acc==1):
                 self.machine.accelerate()
 
-        if self.machine.is_driving_full_speed():
+        if self.machine.is_driving_full_speed(allow_substates=True):
             if (acc and acc==0):
                 self.machine.brake()
 
-        if self.machine.is_driving_braking():
+        if self.machine.is_driving_braking(allow_substates=True):
                 self.machine.drive()
 
         if mode != 'user' and lane!=None:
