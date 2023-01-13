@@ -65,12 +65,12 @@ class ObstacleDetector(object):
 
     def getRoiLeft(self, frame):
         width, height = frame.size
-        roi = frame.crop(0, int(height*self.cfg.OBSTACLE_DETECTOR_ROI_TOP), int(width*self.cfg.OBSTACLE_DETECTOR_ROI_RIGHT), int(height*self.cfg.OBSTACLE_DETECTOR_ROI_BOTTOM))
+        roi = frame.crop((0, int(height*self.cfg.OBSTACLE_DETECTOR_ROI_TOP), int(width*self.cfg.OBSTACLE_DETECTOR_ROI_RIGHT), int(height*self.cfg.OBSTACLE_DETECTOR_ROI_BOTTOM)))
         return roi
 
     def getRoiRight(self, frame):
         width, height = frame.size
-        roi = frame.crop(int(width*self.cfg.OBSTACLE_DETECTOR_ROI_LEFT), int(height*self.cfg.OBSTACLE_DETECTOR_ROI_TOP), int(width), int(height*self.cfg.OBSTACLE_DETECTOR_ROI_BOTTOM))
+        roi = frame.crop((int(width*self.cfg.OBSTACLE_DETECTOR_ROI_LEFT), int(height*self.cfg.OBSTACLE_DETECTOR_ROI_TOP), int(width), int(height*self.cfg.OBSTACLE_DETECTOR_ROI_BOTTOM)))
         return roi
 
     def classify_img (self, img):
