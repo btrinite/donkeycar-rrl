@@ -468,13 +468,13 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
     def set_brakespeed(self):
         self.fix_throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
 
-    transitions = [
-        {'trigger':'drive', 'source':'stopped', 'dest':'driving','before':set_regularspeed},
-        {'trigger':'stop', 'source':'driving', 'dest':'stopped'},
-        {'trigger':'accelerate', 'source':['driving','driving_regularspeed'], 'dest':'driving_fullspeed', 'before':set_fullspeed},
-        {'trigger':'brake', 'source':['driving', 'driving_fullspeed'], 'dest':'driving_braking', 'before':set_brakespeed},
-        {'trigger':'drive', 'source':['driving', 'driving_braking'], 'dest':'driving_regularspeed', 'before':set_regularspeed},
-        ]
+    #transitions = [
+    #    {'trigger':'drive', 'source':'stopped', 'dest':'driving','before':set_regularspeed},
+    #    {'trigger':'stop', 'source':'driving', 'dest':'stopped'},
+    #    {'trigger':'accelerate', 'source':['driving','driving_regularspeed'], 'dest':'driving_fullspeed', 'before':set_fullspeed},
+    #    {'trigger':'brake', 'source':['driving', 'driving_fullspeed'], 'dest':'driving_braking', 'before':set_brakespeed},
+    #    {'trigger':'drive', 'source':['driving', 'driving_braking'], 'dest':'driving_regularspeed', 'before':set_regularspeed},
+    #    ]
 
     def __init__(self, cfg):
         self.cfg = cfg
@@ -484,7 +484,14 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         self.fix_throttle = 0
         self.lane = 0
         self.on = True
+
         self.machine = HierarchicalMachine(self, states=self.states, transitions=self.transitions, initial='stopped', ignore_invalid_triggers=True)
+        self.machine.add_transition (trigger='drive', source='stopped', dest='driving', before='set_regularspeed')
+        self.machine.add_transition (trigger='stop', source='driving', dest='stopped')
+        self.machine.add_transition (trigger='accelerate', source='driving_regularspeed', dest='driving_fullspeed', before='set_fullspeed')
+        self.machine.add_transition (trigger='brake', source='driving_fullspeed', dest='driving_braking', before='set_brakespeed')
+        self.machine.add_transition (trigger='drive', source='driving_braking', dest='driving_regularspeed', before='set_regularspeed')
+
         drivetrainlogger.info('starting RobocarsHatLaneCtrl Hat Controller')
 
     def processState(self, throttle, angle, mode, lane, acc):
