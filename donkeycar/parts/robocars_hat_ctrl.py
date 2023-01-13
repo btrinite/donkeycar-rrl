@@ -459,14 +459,14 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
             {'name':'driving','initial':'regularspeed', 'children':['regularspeed', 'fullspeed','braking']}
             ]
 
-    def set_regularspeed():
-        self.fix_throttle = cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
+    def set_regularspeed(self):
+        self.fix_throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
 
-    def set_fullspeed():
-        self.fix_throttle = cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
+    def set_fullspeed(self):
+        self.fix_throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
 
-    def set_brakespeed():
-        self.fix_throttle = cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
+    def set_brakespeed(self):
+        self.fix_throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
 
     transitions = [
         {'trigger':'drive', 'source':'stopped', 'dest':'driving','before':set_regularspeed},
