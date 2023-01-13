@@ -427,7 +427,6 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
               outputs=['pilot/throttle'])
 
     if cfg.OBSTACLE_DETECTOR and cfg.ACQUIRE_FULL_IMAGE_VGA:
-:
         from donkeycar.parts.object_detector.obstacle_detector \
             import ObstacleDetector
         V.add(ObstacleDetector(cfg.OBSTACLE_MIN_SCORE,
