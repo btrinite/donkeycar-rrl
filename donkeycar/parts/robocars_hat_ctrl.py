@@ -504,10 +504,11 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
 
     def is_acc_confition(self):
         acc_arr = list(self.last_acc)
-        if sum(acc_arr) >= self.cfg.ROBOCARS_ACC_FILTER_TRESH_HIGH:
+        acc_count = sum(acc_arr)
+        if sum(acc_count) >= self.cfg.ROBOCARS_ACC_FILTER_TRESH_HIGH:
             return True
-        if sum(acc_arr) <= self.cfg.ROBOCARS_ACC_FILTER_TRESH_LOW:
-            return True
+        if sum(acc_count) <= self.cfg.ROBOCARS_ACC_FILTER_TRESH_LOW:
+            return False
         return None
 
     def processState(self, throttle, angle, mode, lane, acc):
@@ -524,11 +525,11 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
                 self.stop()
 
         if self.is_driving_regularspeed(allow_substates=True):
-            if (acc!=None and self.is_acc_confition()==True) :
+            if (self.is_acc_confition()==True) :
                 self.accelerate()
 
         if self.is_driving_fullspeed(allow_substates=True):
-            if (acc!=None and self.is_acc_confition()==False):
+            if (self.is_acc_confition()==False):
                 self.brake()
 
         if self.is_driving_braking(allow_substates=True):
