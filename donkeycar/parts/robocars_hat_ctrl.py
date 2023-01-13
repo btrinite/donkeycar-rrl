@@ -484,7 +484,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         self.fix_throttle = 0
         self.lane = 0
         self.on = True
-        self.machine = HierarchicalMachine(states=self.states, transitions=self.transitions, initial='stopped', ignore_invalid_triggers=True)
+        self.machine = HierarchicalMachine(self, states=self.states, transitions=self.transitions, initial='stopped', ignore_invalid_triggers=True)
         drivetrainlogger.info('starting RobocarsHatLaneCtrl Hat Controller')
 
     def processState(self, throttle, angle, mode, lane, acc):
