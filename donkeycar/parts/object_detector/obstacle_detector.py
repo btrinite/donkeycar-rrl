@@ -111,15 +111,21 @@ class ObstacleDetector(object):
     Return an object if there is a traffic light in the frame
     '''
     def detect_obstacle (self, img_arr):
+
         img = self.convertImageArrayToPILImage(img_arr)
         left_img = self.getRoiLeft (img)
-        obstacle = self.classify_img(left_img)
+        right_img = self.getRoiLeft (img)
+        obstacle_left = self.classify_img(left_img)
+        obstacle_right = self.classify_img(right_img)
 
-        label="---"
-        if obstacle:
-            label = f"{self.labels.get(obstacle.id, obstacle.id)} ({obstacle.score})"
+        left_label = "---"
+        right_label = "---"
+        if obstacle_left:
+            left_label = f"{self.labels.get(obstacle_left.id, obstacle_left.id)} ({obstacle_left.score})"
+        if obstacle_right:
+            right_label = f"{self.labels.get(obstacle_right.id, obstacle_right.id)} ({obstacle_right.score})"
 
-        return left_img, label
+        return left_label, right_label
 
     def run(self, img_arr, full_img_arr):
         if img_arr is None:
@@ -131,8 +137,7 @@ class ObstacleDetector(object):
         else :
             img_for_detect = img_arr
 
-        left_img, right_label = self.detect_obstacle(img_for_detect)
-        right_img, right_label = self.detect_obstacle(img_for_detect)
+        left_label, right_label = self.detect_obstacle(img_for_detect)
         lanelogger.info(f" {left_label} <--- car ---> {right_label}")
 
             
