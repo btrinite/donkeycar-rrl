@@ -456,14 +456,14 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
 
     states = [
             {'name':'stopped'}, 
-            {'name':'driving','initial':'regularspeed', 'children':['regularspeed', 'full_speed','braking']}
+            {'name':'driving','initial':'regularspeed', 'children':['regularspeed', 'fullspeed','braking']}
             ]
 
     transitions = [
         {'trigger':'drive', 'source':'stopped', 'dest':'driving'},
         {'trigger':'stop', 'source':'driving', 'dest':'stopped'},
-        {'trigger':'accelerate', 'source':['driving','driving_regularspeed'], 'dest':'driving_full_speed'},
-        {'trigger':'brake', 'source':['driving', 'driving_full_speed'], 'dest':'driving_braking'},
+        {'trigger':'accelerate', 'source':['driving','driving_regularspeed'], 'dest':'driving_fullspeed'},
+        {'trigger':'brake', 'source':['driving', 'driving_fullspeed'], 'dest':'driving_braking'},
         {'trigger':'drive', 'source':['driving', 'driving_braking'], 'dest':'driving_regularspeed'},
         ]
 
@@ -494,7 +494,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
             if (acc and acc==1):
                 self.machine.accelerate()
 
-        if self.machine.is_driving_full_speed(allow_substates=True):
+        if self.machine.is_driving_fullspeed(allow_substates=True):
             if (acc and acc==0):
                 self.machine.brake()
 
