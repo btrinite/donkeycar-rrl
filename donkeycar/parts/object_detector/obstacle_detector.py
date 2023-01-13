@@ -67,7 +67,7 @@ class ObstacleDetector(object):
     '''
     def detect_obstacle (self, img_arr):
         img = self.convertImageArrayToPILImage(img_arr)
-        img_to_classify = img.resize(size, Image.ANTIALIAS)
+        img_to_classify = img.resize(self.size, Image.ANTIALIAS)
 
         params = common.input_details(self.interpreter, 'quantization_parameters')
         scale = params['scales']
