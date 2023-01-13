@@ -124,7 +124,7 @@ class Webcam(BaseCamera):
 
         self.resolution = (image_w, image_h)
         self.capture_resolution = (image_w, image_h)
-        if self.cfg.acquire_full_frame_vga:
+        if self.acquire_full_frame_vga:
             self.capture_resolution = (640, 480)
 
 
@@ -175,7 +175,7 @@ class Webcam(BaseCamera):
                 if self.image_d == 1:
                     self.frame = rgb2gray(frame)
 
-        if self.cfg.acquire_full_frame_vga:
+        if self.acquire_full_frame_vga:
             return self.frame, self.full_frame
         else:
             return self.frame
@@ -192,7 +192,7 @@ class Webcam(BaseCamera):
 
 
     def run_threaded(self):
-        if self.cfg.acquire_full_frame_vga:
+        if self.acquire_full_frame_vga:
             return self.frame, self.full_frame
         else:
             return self.frame
