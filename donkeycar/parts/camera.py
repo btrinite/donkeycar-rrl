@@ -122,6 +122,10 @@ class Webcam(BaseCamera):
         logger.info('Opening Webcam...')
 
         self.resolution = (image_w, image_h)
+        self.capture_resolution = (image_w, image_h)
+        if self.cfg.ACQUIRE_FULL_IMAGE_VGA:
+            self.capture_resolution = (640, 480)
+
 
         try:
             pygame.init()
@@ -135,7 +139,7 @@ class Webcam(BaseCamera):
             if camera_index < 0 or camera_index >= len(l):
                 raise CameraError(f"The 'CAMERA_INDEX={camera_index}' configuration in myconfig.py is out of range.")
 
-            self.cam = pygame.camera.Camera(l[camera_index], self.resolution, "RGB")
+            self.cam = pygame.camera.Camera(l[camera_index], self.capture_resolution, "RGB")
             self.cam.start()
 
             logger.info(f'Webcam opened at {l[camera_index]} ...')
@@ -165,10 +169,14 @@ class Webcam(BaseCamera):
             if snapshot is not None:
                 snapshot1 = pygame.transform.scale(snapshot, self.resolution)
                 self.frame = pygame.surfarray.pixels3d(pygame.transform.rotate(pygame.transform.flip(snapshot1, True, False), 90))
+                self.full_frame = pygame.surfarray.pixels3d(pygame.transform.rotate(pygame.transform.flip(snapshot, True, False), 90))
                 if self.image_d == 1:
                     self.frame = rgb2gray(frame)
 
-        return self.frame
+        if self.cfg.ACQUIRE_FULL_IMAGE_VGA:
+            return self.frame, self.full_frame
+        else:
+            return self.frame
 
     def update(self):	
         from datetime import datetime, timedelta
@@ -182,7 +190,10 @@ class Webcam(BaseCamera):
 
 
     def run_threaded(self):
-        return self.frame
+        if self.cfg.ACQUIRE_FULL_IMAGE_VGA:
+            return self.frame, self.full_frame
+        else:
+            return self.frame
 
     def shutdown(self):
         # indicate that the thread should be stopped

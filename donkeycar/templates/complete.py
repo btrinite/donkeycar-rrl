@@ -426,12 +426,13 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
               inputs=['pilot/throttle'],
               outputs=['pilot/throttle'])
 
-    if cfg.OBSTACLE_DETECTOR:
+    if cfg.OBSTACLE_DETECTOR and cfg.ACQUIRE_FULL_IMAGE_VGA:
+:
         from donkeycar.parts.object_detector.obstacle_detector \
             import ObstacleDetector
         V.add(ObstacleDetector(cfg.OBSTACLE_MIN_SCORE,
                                cfg.OBSTACLE_SHOW_BOUNDING_BOX),
-              inputs=['cam/image_array'],
+              inputs=['cam/image_array', 'cam/full_image_array'],
               outputs=['cam/image_array', 'obstacle/label'])
 
     #
@@ -828,6 +829,8 @@ def add_camera(V, cfg, camera_type):
     else:
         inputs = []
         outputs = ['cam/image_array']
+        if cfg.ACQUIRE_FULL_IMAGE_VGA:
+            outputs.append('cam/full_image_array')
         threaded = True
         cam = get_camera(cfg)
         if cam:

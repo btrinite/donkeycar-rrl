@@ -62,13 +62,19 @@ class ObstacleDetector(object):
         img = np.array(img_pil) 
         return img
 
-    '''
-    Return an object if there is a traffic light in the frame
-    '''
-    def detect_obstacle (self, img_arr):
-        img = self.convertImageArrayToPILImage(img_arr)
-        img_to_classify = img.resize(self.size, Image.ANTIALIAS)
+    def getRoiLeft(self, frame):
+        width, height = frame.size
+        roi = frame.crop(0, int(height*self.cfg.OBSTACLE_DETECTOR_ROI_TOP), int(width*self.cfg.OBSTACLE_DETECTOR_ROI_RIGHT), int(height*self.cfg.OBSTACLE_DETECTOR_ROI_BOTTOM))
+        return roi
 
+    def getRoiRight(self, frame):
+        width, height = frame.size
+        roi = frame.crop(int(width*self.cfg.OBSTACLE_DETECTOR_ROI_LEFT), int(height*self.cfg.OBSTACLE_DETECTOR_ROI_TOP), int(width), int(height*self.cfg.OBSTACLE_DETECTOR_ROI_BOTTOM))
+        return roi
+
+    def classify_img (self, img):
+
+        img_to_classify = img.resize(self.size, Image.ANTIALIAS)
         params = common.input_details(self.interpreter, 'quantization_parameters')
         scale = params['scales']
         zero_point = params['zero_points']
@@ -100,16 +106,26 @@ class ObstacleDetector(object):
 
         return obstacle_obj
 
-    def run(self, img_arr):
+    '''
+    Return an object if there is a traffic light in the frame
+    '''
+    def detect_obstacle (self, img_arr):
+        img = self.convertImageArrayToPILImage(img_arr)
+        left_img = self.getRoiLeft (img)
+        obstacle = self.classify_img(left_img)
+
+        label="--"
+        coords="--"
+        if obstacle:
+            label = f"{self.labels.get(obstacle.id, obstacle.id)} ({obstacle.score})"
+
+
+    def run(self, img_arr, full_img_arr):
         if img_arr is None:
             return img_arr
 
         # Detect traffic light object
-        obstacle_obj = self.detect_obstacle(img_arr)
+        self.detect_obstacle(img_arr)
 
-        label="--"
-        coords="--"
-        if obstacle_obj:
-            label = f"{self.labels.get(obstacle_obj.id, obstacle_obj.id)} ({obstacle_obj.score})"
             
         return img_arr, label 
