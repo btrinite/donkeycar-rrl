@@ -12,7 +12,7 @@ import errno
 import sys
 import fcntl,os
 from transitions.extensions import HierarchicalMachine
-import queue
+from collections import deque
 
 mylogger = init_special_logger ("Rx")
 mylogger.setLevel(logging.INFO)
@@ -485,7 +485,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
             self.hatInCtrl = RobocarsHatInCtrl(self.cfg)
         self.fix_throttle = 0
         self.brake_cycle = 0
-        self.last_acc=queue.Queue(self.cfg.ROBOCARS_ACC_FILTER_SIZE)
+        self.last_acc=deque(maxlen=self.cfg.ROBOCARS_ACC_FILTER_SIZE)
         self.lane = 0
         self.on = True
 
@@ -500,7 +500,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
 
     def update_acc_filter (self,acc):
         if (acc != None) :
-            self.last_acc.put(acc)
+            self.last_acc.append(acc)
 
     def is_acc_confition(self):
         acc_arr = list(self.last_acc)
