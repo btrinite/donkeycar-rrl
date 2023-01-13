@@ -456,15 +456,15 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
 
     states = [
             {'name':'stopped'}, 
-            {'name':'driving','children':['regular_speed', 'full_speed','braking']}
+            {'name':'driving','initial':'regularspeed', 'children':['regularspeed', 'full_speed','braking']}
             ]
 
     transitions = [
         {'trigger':'drive', 'source':'stopped', 'dest':'driving'},
         {'trigger':'stop', 'source':'driving', 'dest':'stopped'},
-        {'trigger':'accelerate', 'source':['driving','driving_regular_speed'], 'dest':'driving_full_speed'},
+        {'trigger':'accelerate', 'source':['driving','driving_regularspeed'], 'dest':'driving_full_speed'},
         {'trigger':'brake', 'source':['driving', 'driving_full_speed'], 'dest':'driving_braking'},
-        {'trigger':'drive', 'source':['driving', 'driving_braking'], 'dest':'driving_regular_speed'},
+        {'trigger':'drive', 'source':['driving', 'driving_braking'], 'dest':'driving_regularspeed'},
         ]
 
     def __init__(self, cfg):
@@ -482,23 +482,23 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
     def processLane(self, throttle, angle, mode, lane, acc):
 
 
-        if self.machine.state=='stopped':
+        if self.machine.is_stopped():
             if (mode != 'user') :
                 self.machine.drive()
 
-        if self.machine.state=='driving':
+        if self.machine.is_driving()):
             if (mode == 'user') :
                 self.machine.stop()
 
-        if self.machine.state=='driving_regular_speed':
+        if self.machine.is_driving_regularspeed():
             if (acc and acc==1):
                 self.machine.accelerate()
 
-        if self.machine.state=='driving_full_speed':
+        if self.machine.is_driving_full_speed():
             if (acc and acc==0):
                 self.machine.brake()
 
-        if self.machine.state=='driving_braking':
+        if self.machine.is_driving_braking():
                 self.machine.drive()
 
         if mode != 'user' and lane!=None:
