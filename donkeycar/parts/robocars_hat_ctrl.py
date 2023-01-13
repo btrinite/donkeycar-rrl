@@ -505,9 +505,9 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
     def is_acc_confition(self):
         acc_arr = list(self.last_acc)
         acc_count = sum(acc_arr)
-        if sum(acc_count) >= self.cfg.ROBOCARS_ACC_FILTER_TRESH_HIGH:
+        if acc_count >= self.cfg.ROBOCARS_ACC_FILTER_TRESH_HIGH:
             return True
-        if sum(acc_count) <= self.cfg.ROBOCARS_ACC_FILTER_TRESH_LOW:
+        if acc_count <= self.cfg.ROBOCARS_ACC_FILTER_TRESH_LOW:
             return False
         return None
 
