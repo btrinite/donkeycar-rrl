@@ -126,7 +126,10 @@ class ObstacleDetector(object):
             return img_arr
 
         # Detect traffic light object
-        left_img, labels = self.detect_obstacle(full_img_arr if full_img_arr!=None else img_arr)
+        if full_img_arr:
+            left_img, labels = self.detect_obstacle(full_img_arr)
+        else :
+            left_img, labels = self.detect_obstacle(img_arr)
 
             
-        return img_arr, label 
+        return img_arr, labels 
