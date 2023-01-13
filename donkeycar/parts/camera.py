@@ -87,7 +87,7 @@ class PiCamera(BaseCamera):
 
 
 class Webcam(BaseCamera):
-    def __init__(self, image_w=160, image_h=120, image_d=3, framerate = 20, camera_index = 0):
+    def __init__(self, image_w=160, image_h=120, image_d=3, framerate = 20, camera_index = 0, acquire_full_frame_vga=False):
         #
         # pygame is not installed by default.
         # Installation on RaspberryPi (with env activated):
@@ -105,6 +105,7 @@ class Webcam(BaseCamera):
         self.image_d = image_d
         self.image_w = image_w
         self.image_h = image_h
+        self.acquire_full_frame_vga = acquire_full_frame_vga
 
         self.init_camera(image_w, image_h, image_d, camera_index)
         self.on = True
@@ -123,7 +124,7 @@ class Webcam(BaseCamera):
 
         self.resolution = (image_w, image_h)
         self.capture_resolution = (image_w, image_h)
-        if self.cfg.ACQUIRE_FULL_IMAGE_VGA:
+        if self.cfg.acquire_full_frame_vga:
             self.capture_resolution = (640, 480)
 
 
@@ -169,11 +170,12 @@ class Webcam(BaseCamera):
             if snapshot is not None:
                 snapshot1 = pygame.transform.scale(snapshot, self.resolution)
                 self.frame = pygame.surfarray.pixels3d(pygame.transform.rotate(pygame.transform.flip(snapshot1, True, False), 90))
-                self.full_frame = pygame.surfarray.pixels3d(pygame.transform.rotate(pygame.transform.flip(snapshot, True, False), 90))
+                if (self.acquire_full_frame_vga):
+                    self.full_frame = pygame.surfarray.pixels3d(pygame.transform.rotate(pygame.transform.flip(snapshot, True, False), 90))
                 if self.image_d == 1:
                     self.frame = rgb2gray(frame)
 
-        if self.cfg.ACQUIRE_FULL_IMAGE_VGA:
+        if self.cfg.acquire_full_frame_vga:
             return self.frame, self.full_frame
         else:
             return self.frame
@@ -190,7 +192,7 @@ class Webcam(BaseCamera):
 
 
     def run_threaded(self):
-        if self.cfg.ACQUIRE_FULL_IMAGE_VGA:
+        if self.cfg.acquire_full_frame_vga:
             return self.frame, self.full_frame
         else:
             return self.frame
