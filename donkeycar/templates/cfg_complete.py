@@ -523,8 +523,6 @@ ROBOCARSHAT_PWM_IN_AUX_MAX    =   2000
 ROBOCARSHAT_ODOM_IN_MAX = 20000
 ROBOCARSHAT_PILOT_MODE = 'local' # Which autonomous mode is triggered by Hat : local_angle or local
 ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE = 0.3 # For pilot_angle autonomous mode, default throttle
-ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS = 0.6 # For pilot_angle autonomous mode, throttle for straight line parts 
-ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE = 0.2 # For pilot_angle autonomous mode, throttle for turn entry (brake)
 ROBOCARSHAT_BRAKE_ON_IDLE_THROTTLE = -0.2
 
 THROTTLE_BRAKE_REV_FILTER = False # ESC is configured in Fw/Rv mode (no braking)
@@ -576,8 +574,11 @@ ROBOCARS_LANE_STEERING_ADJUST_STEPS=[0,0.2,0.4]
 # Acceleration model
 ROBOCARS_ACC_MODEL=False
 ROBOCARS_THROTTLE_ON_ACC=False
+ROBOCARS_THROTTLE_ON_ACC_REGULAR_SPEED = 0.6 # For pilot_angle autonomous mode, throttle for straight line parts 
+ROBOCARS_THROTTLE_ON_ACC_FULL_SPEED = 0.6 # For pilot_angle autonomous mode, throttle for straight line parts 
+ROBOCARS_THROTTLE_ON_ACC_BRAKE_SPEED = 0.2 # For pilot_angle autonomous mode, throttle for turn entry (brake)
 ROBOCARS_THROTTLE_ON_ACC_BRAKE_DURATION=5
-ROBOCARS_THROTTLE_ON_ACC_BRAKE_FORCE=5
+
 ROBOCARS_NUM_ACC_CAT=2
 
 #LOGGING

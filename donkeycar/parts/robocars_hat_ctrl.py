@@ -460,13 +460,14 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
             ]
 
     def set_regularspeed(self):
-        self.fix_throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
+        self.fix_throttle = self.cfg.ROBOCARS_THROTTLE_ON_ACC_REGULAR_SPEED
 
     def set_fullspeed(self):
-        self.fix_throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
+        self.fix_throttle = self.cfg.ROBOCARS_THROTTLE_ON_ACC_FULL_SPEED
 
     def set_brakespeed(self):
-        self.fix_throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
+        self.fix_throttle = self.cfg.ROBOCARS_THROTTLE_ON_ACC_BRAKE_SPEED
+        self.brake_cycle = self.cfg.ROBOCARS_THROTTLE_ON_ACC_BRAKE_DURATION
 
     #transitions = [
     #    {'trigger':'drive', 'source':'stopped', 'dest':'driving','before':set_regularspeed},
@@ -482,6 +483,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         if (self.cfg.USE_ROBOCARSHAT_AS_CONTROLLER):
             self.hatInCtrl = RobocarsHatInCtrl(self.cfg)
         self.fix_throttle = 0
+        self.brake_cycle = 0
         self.lane = 0
         self.on = True
 
@@ -515,7 +517,10 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
                 self.brake()
 
         if self.is_driving_braking(allow_substates=True):
+            if self.brake_cycle == 0:
                 self.drive()
+            else:
+                self.brake_cycle -=1
 
         return throttle, angle
  
