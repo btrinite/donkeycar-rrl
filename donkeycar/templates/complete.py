@@ -829,7 +829,7 @@ def add_camera(V, cfg, camera_type):
         inputs = []
         outputs = ['cam/image_array']
         if cfg.ACQUIRE_FULL_IMAGE_VGA:
-            outputs.append('cam/full_image_array')
+            outputs+=['cam/full_image_array']
         threaded = True
         cam = get_camera(cfg)
         if cam:
