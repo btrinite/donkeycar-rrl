@@ -397,7 +397,7 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
         if cfg.ROBOCARS_LANE_MODEL:
             outputs.append("pilot/lane")
 
-        if cfg.ROBOCARS_TURN_MODEL:
+        if cfg.ROBOCARS_ACC_MODEL:
             outputs.append("pilot/acc")
         #
         # Add image transformations like crop or trapezoidal mask
