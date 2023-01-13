@@ -489,7 +489,6 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
 
     def processState(self, throttle, angle, mode, lane, acc):
 
-
         if self.machine.is_stopped(allow_substates=True):
             if (mode != 'user') :
                 self.machine.drive()
@@ -511,6 +510,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         if self.machine.is_driving_braking(allow_substates=True):
                 self.machine.drive()
 
+        return throttle, angle
 
 """         if mode != 'user' and lane!=None:
 
@@ -538,7 +538,6 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
 
             drivetrainlogger.debug(f"LaneCtrl     -> enforce throttle: {throttle}")      
  """
-        return throttle, angle
 
     def update(self):
         # not implemented
