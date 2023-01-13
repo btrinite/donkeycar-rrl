@@ -115,8 +115,7 @@ class ObstacleDetector(object):
         left_img = self.getRoiLeft (img)
         obstacle = self.classify_img(left_img)
 
-        label="--"
-        coords="--"
+        label="---"
         if obstacle:
             label = f"{self.labels.get(obstacle.id, obstacle.id)} ({obstacle.score})"
 
@@ -128,9 +127,14 @@ class ObstacleDetector(object):
 
         # Detect traffic light object
         if full_img_arr is not None:
-            left_img, labels = self.detect_obstacle(full_img_arr)
+            left_img, left_label = self.detect_obstacle(full_img_arr)
+            right_img, right_label = self.detect_obstacle(full_img_arr)
+            lanelogger.info(f" {left_label} <--- car ---> {right_label}")
+
+
         else :
-            left_img, labels = self.detect_obstacle(img_arr)
+            left_img, right_label = self.detect_obstacle(img_arr)
+            right_img, right_label = self.detect_obstacle(img_arr)
 
             
-        return img_arr, labels 
+        return img_arr, "--" 
