@@ -439,7 +439,7 @@ class RobocarsHatInOdom:
 
 drivetrainlogger = init_special_logger ("DrivetrainCtrl")
 drivetrainlogger.setLevel(logging.INFO)
-drivetrainlogger.getLogger('transitions').setLevel(logging.INFO)
+logging.getLogger('transitions').setLevel(logging.INFO)
 
 class RobocarsHatDriveCtrl(metaclass=Singleton):
 
