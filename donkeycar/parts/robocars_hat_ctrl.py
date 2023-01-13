@@ -486,7 +486,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
             if (mode != 'user') :
                 self.machine.drive()
 
-        if self.machine.is_driving()):
+        if self.machine.is_driving():
             if (mode == 'user') :
                 self.machine.stop()
 
