@@ -8,6 +8,7 @@ from subprocess import Popen, PIPE, STDOUT
 from threading import Thread
 from collections import namedtuple
 from kivy.logger import Logger
+import cv2
 
 import io
 import os
@@ -107,6 +108,10 @@ class RcFileHandler:
         FieldProperty('user/throttle', '', centered=False),
         FieldProperty('pilot/angle', '', centered=True),
         FieldProperty('pilot/throttle', '', centered=False),
+        FieldProperty('user/lane', '', centered=False),
+        FieldProperty('user/acc', '', centered=False),
+        FieldProperty('pilot/lane', '', centered=False),
+        FieldProperty('pilot/acc', '', centered=False),
     ]
 
     def __init__(self, file_path='~/.donkeyrc'):
@@ -136,7 +141,9 @@ class RcFileHandler:
     def create_data(self):
         data = dict()
         data['user_pilot_map'] = {'user/throttle': 'pilot/throttle',
-                                  'user/angle': 'pilot/angle'}
+                                  'user/angle': 'pilot/angle',
+                                  'user/lane':'pilot/lane',
+                                  'user/acc':'pilot/acc'}
         return data
 
     def read_file(self):
@@ -402,8 +409,32 @@ class FullImage(Image):
         except Exception as e:
             Logger.error(f'Record: Bad record: {e}')
 
+    def process_image_analysis (self, image):
+        height=image.shape[0]
+        width=image.shape[1]
+
+        top = 0.20
+        bottom = 0.8
+        left=0.45
+        right=0.55
+        b1x1=0
+        b1y1=int(height*top)
+        b1x2=int(width*right)
+        b1y2=int(height*bottom)
+
+        b2x1=int(width*left)
+        b2y1=int(height*top)
+        b2x2=int(width*1.0)
+        b2y2=int(height*bottom)
+
+        cv2.rectangle(image, (b1x1,b1y1),(b1x2,b1y2),(0,255,0),thickness=2)
+        cv2.rectangle(image, (b2x1,b2y1),(b2x2,b2y2),(0,0,255),thickness=2)
+        return image
+
     def get_image(self, record):
-        return record.image()
+        return self.process_image_analysis(record.image())
+        #return record.image()
+
 
 
 class ControlPanel(BoxLayout):
@@ -729,6 +760,8 @@ class OverlayImage(FullImage):
     pilot = ObjectProperty()
     pilot_record = ObjectProperty()
     throttle_field = StringProperty('user/throttle')
+    lane_field = StringProperty('user/lane')
+    acc_field = StringProperty('user/acc')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -777,6 +810,20 @@ class OverlayImage(FullImage):
             = get_norm_value(output[1], tub_screen().ids.config_manager.config,
                              rc_handler.field_properties[self.throttle_field],
                              normalised=False)
+        additional_outputs_index = 2
+        if (config.ROBOCARS_LANE_MODEL):
+            pilot_lane_field \
+                = rc_handler.data['user_pilot_map'][self.lane_field]
+            out_record.underlying[pilot_lane_field] \
+                = output[additional_outputs_index]
+            additional_outputs_index += 1
+
+        if (config.ROBOCARS_ACC_MODEL):
+            pilot_acc_field \
+                = rc_handler.data['user_pilot_map'][self.acc_field]
+            out_record.underlying[pilot_acc_field] \
+                = output[additional_outputs_index]
+
         self.pilot_record = out_record
         return img_arr
 

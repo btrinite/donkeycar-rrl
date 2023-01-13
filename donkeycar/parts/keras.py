@@ -320,21 +320,23 @@ class KerasLinear(KerasPilot):
     def __init__(self,
                  interpreter: Interpreter = KerasInterpreter(),
                  input_shape: Tuple[int, ...] = (120, 160, 3),
-                 num_outputs: int = 2, have_odom=False, have_lane_loc=False, num_lane_cat=0, have_turn_loc=False, num_turn_cat=0):
+                 num_outputs: int = 2, have_odom=False, have_lane_loc=False, num_lane_cat=0, have_acc_loc=False, num_acc_cat=0):
         self.num_outputs = num_outputs
         self.have_odom=have_odom
         self.have_lane_loc=have_lane_loc
         self.num_lane=num_lane_cat
-        self.have_turn_loc=have_turn_loc
-        self.num_turn=num_turn_cat
+        self.have_acc_loc=have_acc_loc
+        self.num_acc=num_acc_cat
         super().__init__(interpreter, input_shape)
-        logger.info(f'Created {self} with odom={have_odom}, lane={have_lane_loc}, turn={have_turn_loc}')
+        logger.info(f'Created {self} with odom={have_odom}, lane={have_lane_loc}, acc={have_acc_loc}')
 
     def create_model(self):
         if self.have_odom:
-            return default_n_linear_odom_lane_turn(num_outputs=self.num_outputs, input_shape=self.input_shape, num_lane=self.num_lane if self.have_lane_loc else 0, num_turn=self.num_turn if self.have_turn_loc else 0)
+            return default_n_linear_odom_lane_acc(num_outputs=self.num_outputs, input_shape=self.input_shape, 
+                num_lane=self.num_lane if self.have_lane_loc else 0, num_acc=self.num_acc if self.have_acc_loc else 0)
         else:
-            return default_n_linear(num_outputs=self.num_outputs, input_shape=self.input_shape)
+            return default_n_linear_lane_acc(num_outputs=self.num_outputs, input_shape=self.input_shape,
+            num_lane=self.num_lane if self.have_lane_loc else 0, num_acc=self.num_acc if self.have_acc_loc else 0)
 
     def compile(self):
         self.interpreter.compile(optimizer=self.optimizer, metrics=['acc'], loss='mse')
@@ -345,10 +347,10 @@ class KerasLinear(KerasPilot):
         if self.have_lane_loc:
             track_lane = interpreter_out[2]
             lane = np.argmax(track_lane)
-            if self.have_turn_loc:
-                track_turn = interpreter_out[3]
-                turn = np.argmax(track_turn)
-                return steering[0], throttle[0], lane, turn
+            if self.have_acc_loc:
+                track_acc = interpreter_out[3]
+                acc = np.argmax(track_acc)
+                return steering[0], throttle[0], lane, acc
             else:
                 return steering[0], throttle[0], lane
         else:
@@ -379,11 +381,11 @@ class KerasLinear(KerasPilot):
             lane_one_hot = np.zeros(self.num_lane)
             lane_one_hot[lane] = 1
             y_trans.update({'n_outputs2': lane_one_hot})
-        if self.have_turn_loc:
-            turn: int = int(record.underlying['user/turn'])
-            turn_one_hot = np.zeros(self.num_turn)
-            turn_one_hot[turn] = 1
-            y_trans.update({'n_outputs3': turn_one_hot})
+        if self.have_acc_loc:
+            acc: int = int(record.underlying['user/acc'])
+            acc_one_hot = np.zeros(self.num_acc)
+            acc_one_hot[acc] = 1
+            y_trans.update({'n_outputs3': acc_one_hot})
         return y_trans
 
     def output_shapes(self):
@@ -396,8 +398,8 @@ class KerasLinear(KerasPilot):
                     'n_outputs1': tf.TensorShape([])}
         if self.have_lane_loc:
             shapes_out.update({'n_outputs2': tf.TensorShape([self.num_lane])})
-        if self.have_turn_loc:
-            shapes_out.update({'n_outputs3': tf.TensorShape([self.num_turn])})
+        if self.have_acc_loc:
+            shapes_out.update({'n_outputs3': tf.TensorShape([self.num_acc])})
         return (shapes_in, shapes_out)
 
 
@@ -874,7 +876,7 @@ def core_cnn_layers(img_in, drop, l4_stride=1):
     return x
 
 
-def default_n_linear(num_outputs, input_shape=(120, 160, 3)):
+def default_n_linear_lane_acc(num_outputs, input_shape=(120, 160, 3), num_lane=0, num_acc=0):
     drop = 0.2
     img_in = Input(shape=input_shape, name='img_in')
     x = core_cnn_layers(img_in, drop)
@@ -887,11 +889,17 @@ def default_n_linear(num_outputs, input_shape=(120, 160, 3)):
     for i in range(num_outputs):
         outputs.append(
             Dense(1, activation='linear', name='n_outputs' + str(i))(x))
+    if num_lane>0:
+        lane_out = Dense(num_lane, activation='softmax', name='n_outputs' + str(num_outputs))(x)
+        outputs.append(lane_out)
+    if num_acc>0:
+        acc_out = Dense(num_acc, activation='softmax', name='n_outputs' + str(num_outputs+1))(x)
+        outputs.append(acc_out)
 
     model = Model(inputs=[img_in], outputs=outputs, name='linear')
     return model
 
-def default_n_linear_odom_lane_turn(num_outputs, input_shape=(120, 160, 3), num_lane=0, num_turn=0):
+def default_n_linear_odom_lane_acc(num_outputs, input_shape=(120, 160, 3), num_lane=0, num_acc=0):
     drop = 0.2
     img_in = Input(shape=input_shape, name='img_in')
     speed_in = Input(shape=(1,), name="speed_in")
@@ -918,9 +926,9 @@ def default_n_linear_odom_lane_turn(num_outputs, input_shape=(120, 160, 3), num_
     if num_lane>0:
         lane_out = Dense(num_lane, activation='softmax', name='n_outputs' + str(num_outputs))(z)
         outputs.append(lane_out)
-    if num_turn>0:
-        turn_out = Dense(num_turn, activation='softmax', name='n_outputs' + str(num_outputs+1))(z)
-        outputs.append(turn_out)
+    if num_acc>0:
+        acc_out = Dense(num_acc, activation='softmax', name='n_outputs' + str(num_outputs+1))(z)
+        outputs.append(acc_out)
     model = Model(inputs=[img_in, speed_in], outputs=outputs, name='linear')
     return model
 

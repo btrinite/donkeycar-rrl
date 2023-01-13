@@ -317,8 +317,8 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None, camera_type
         if cfg.ROBOCARS_LANE_MODEL:
             outputs.append("pilot/lane")
 
-        if cfg.ROBOCARS_TURN_MODEL:
-            outputs.append("pilot/turn")
+        if cfg.ROBOCARS_ACC_MODEL:
+            outputs.append("pilot/acc")
 
         V.add(kl, inputs=inputs,
               outputs=outputs,

@@ -31,11 +31,11 @@ class ObstacleDetector(object):
 
         #MODEL_URL = "https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite"
         #LABEL_URL = "https://dl.google.com/coral/canned_models/coco_labels.txt"
-        #https://raw.githubusercontent.com/google-coral/test_data/master/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite
-        #https://raw.githubusercontent.com/google-coral/test_data/master/coco_labels.txt
+        #https://raw.githubusercontent.com/google-coral/test_data/master/tf2_mobilenet_v3_edgetpu_1.0_224_ptq_edgetpu.tflite
+        #https://raw.githubusercontent.com/google-coral/test_data/master/imagenet_labels.txt
 
-        MODEL_FILE_NAME = "edgetpu/tf2_ssd_mobilenet_v2_coco17_ptq_edgetpu.tflite"
-        LABEL_FILE_NAME = "edgetpu/coco_labels.txt"
+        MODEL_FILE_NAME = "edgetpu/tf2_mobilenet_v3_edgetpu_1.0_224_ptq_edgetpu.tflite"
+        LABEL_FILE_NAME = "edgetpu/imagenet_labels.txt"
 
         self.labels = read_label_file(LABEL_FILE_NAME)
 
@@ -67,15 +67,30 @@ class ObstacleDetector(object):
     '''
     def detect_obstacle (self, img_arr):
         img = self.convertImageArrayToPILImage(img_arr)
-        _, scale = common.set_resized_input(
-            self.interpreter, img.size, lambda size: img.resize(size, Image.ANTIALIAS))
+        img_to_classify = img.resize(size, Image.ANTIALIAS)
+
+        params = common.input_details(self.interpreter, 'quantization_parameters')
+        scale = params['scales']
+        zero_point = params['zero_points']
+        mean = 128.0
+        std = 128.0
+        if abs(scale * std - 1) < 1e-5 and abs(mean - zero_point) < 1e-5:
+            # Input data does not require preprocessing.
+            common.set_input(self.interpreter, img_to_classify)
+        else:
+            # Input data requires preprocessing
+            normalized_input = (np.asarray(img_to_classify) - mean) / (std * scale) + zero_point
+            np.clip(normalized_input, 0, 255, out=normalized_input)
+            common.set_input(self.interpreter, normalized_input.astype(np.uint8))
+
         self.interpreter.invoke()
-        objects = detect.get_objects(self.interpreter, score_threshold=self.min_score, image_scale=scale)
+        
+        classes = classify.get_classes(self.interpreter, top_k=3, score_threshold=self.min_score)
 
         max_score = 0
         obstacle_obj = None
-        if objects:
-            for obj in objects:
+        if classes:
+            for obj in classes:
                     if (obj.score > max_score):
                         obstacle_obj = obj
                         max_score = obj.score
@@ -83,46 +98,18 @@ class ObstacleDetector(object):
         if obstacle_obj and self.debug:
             print(f"object {self.labels.get(obstacle_obj.id, obstacle_obj.id)} detected, score = {obstacle_obj.score}")
 
-        return img, obstacle_obj
-
-    def draw_bounding_box(self, obstacle_obj, img_arr):
-        xmargin = (obstacle_obj.bbox.xmax - obstacle_obj.bbox.xmin) *0.1
-
-        xmin = obstacle_obj.bbox.xmin + xmargin
-        xmax = obstacle_obj.bbox.xmax - xmargin
-
-        ymargin = (obstacle_obj.bbox.ymax - obstacle_obj.bbox.ymin) *0.05
-
-        ymin = obstacle_obj.bbox.ymin + ymargin
-        ymax = obstacle_obj.bbox.ymax - ymargin
-
-        cv2.rectangle(img_arr, (xmin, xmax),
-                        (ymin, ymax), (0, 255, 0), 2)
-
-    def draw_objects(self, draw, objs, labels):
-        for obj in objs:
-            bbox = obj.bbox
-            draw.rectangle([(bbox.xmin, bbox.ymin), (bbox.xmax, bbox.ymax)],
-                        outline='red')
-            draw.text((bbox.xmin + 10, bbox.ymin + 10),
-                    '%s\n%.2f' % (labels.get(obj.id, obj.id), obj.score),
-                    fill='red')
+        return obstacle_obj
 
     def run(self, img_arr):
         if img_arr is None:
             return img_arr
 
         # Detect traffic light object
-        pil_img, obstacle_obj = self.detect_obstacle(img_arr)
+        obstacle_obj = self.detect_obstacle(img_arr)
 
         label="--"
         coords="--"
         if obstacle_obj:
             label = f"{self.labels.get(obstacle_obj.id, obstacle_obj.id)} ({obstacle_obj.score})"
-            coords = f"{obstacle_obj.bbox.xmin},{obstacle_obj.bbox.ymin},{obstacle_obj.bbox.xmax},{obstacle_obj.bbox.ymax}"
-            if self.show_bounding_box :
-                #self.draw_objects(ImageDraw.Draw(pil_img), [obstacle_obj], self.labels)
-                #return self.convertPILToImageArray(pil_img), label, coords, 
-                self.draw_bounding_box(obstacle_obj=obstacle_obj, img_arr=img_arr)
             
-        return img_arr, label, coords, 
+        return img_arr, label 

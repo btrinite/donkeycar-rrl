@@ -30,9 +30,8 @@ TubRecordDict = TypedDict(
         'behavior/one_hot_state_array': Optional[List[float]],
         'localizer/location': Optional[int],
         'user/lane': Optional[int],
-        'user/turn': Optional[int],
-        'obstacle/label': str,
-        'obstacle/coords': str
+        'user/acc': Optional[int],
+        'obstacle/label': str
     }
 )
 

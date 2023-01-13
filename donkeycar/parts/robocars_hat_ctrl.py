@@ -11,6 +11,7 @@ import socket
 import errno
 import sys
 import fcntl,os
+from transitions.extensions import HierarchicalMachine
 
 mylogger = init_special_logger ("Rx")
 mylogger.setLevel(logging.INFO)
@@ -436,10 +437,11 @@ class RobocarsHatInOdom:
 
 #class RobocarsHatInBattery:
 
-lanelogger = init_special_logger ("LaneCtrl")
-lanelogger.setLevel(logging.INFO)
+drivetrainlogger = init_special_logger ("DrivetrainCtrl")
+drivetrainlogger.setLevel(logging.INFO)
+drivetrainlogger.getLogger('transitions').setLevel(logging.INFO)
 
-class RobocarsHatLaneCtrl(metaclass=Singleton):
+class RobocarsHatDriveCtrl(metaclass=Singleton):
 
     LANE_LEFT=0
     LANE_CENTER=1
@@ -447,16 +449,24 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
     
     LANE_LABEL=["left","center","right"]
 
-    TURN_DEFAULT = 0
-    TURN_BRAKE_LEFT_TURN = 1
-    TURN_LEFT_TURN = 2
-    TURN_BRAKE_RIGHT_TURN = 3
-    TURN_RIGHT_TURN = 4
-    TURN_STRAIGHT_LINE = 5
+    ACC_DEFAULT = 0
+    ACC_STRAIGHT_LINE = 1
 
-    TURN_LABEL=["default","left turn entry","left turn","right turn entry","right turn","straigt line"]
+    ACC_LABEL=["regular","stright line"]
 
-    
+    states = [
+            'stopped', 
+            {'name':'driving','children':['regular_speed', 'full_speed','braking']}
+            ]
+
+    transitions = [
+        ['trigger':'drive', 'source':'stopped', 'dest':'driving'],
+        ['trigger':'stop', 'source':'driving', 'dest':'stopped'],
+        ['trigger':'accelerate', 'source':['driving','driving_regular_speed'], 'dest':'driving_full_speed'],
+        ['trigger':'brake', 'source':['driving', 'driving_full_speed'], 'dest':'driving_braking'],
+        ['trigger':'drive', 'source':['driving', 'driving_braking'], 'dest':'driving_regular_speed'],
+        ]
+
     def __init__(self, cfg):
         self.cfg = cfg
         self.hatInCtrl = None
@@ -466,10 +476,30 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
         self.steering = 0
         self.lane = 0
         self.on = True
-        self.applyBrake = -1
-        lanelogger.info('starting RobocarsHatLaneCtrl Hat Controller')
+        self.machine = HierarchicalMachine(states=self.states, transitions=self.transitions, initial='stopped', ignore_invalid_triggers=True)
+        drivetrainlogger.info('starting RobocarsHatLaneCtrl Hat Controller')
 
-    def processLane(self,throttle, angle, mode, lane, turn):
+    def processLane(self, throttle, angle, mode, lane, acc):
+
+
+        if self.machine.state=='stopped':
+            if (mode != 'user') :
+                self.machine.drive()
+
+        if self.machine.state=='driving':
+            if (mode == 'user') :
+                self.machine.stop()
+
+        if self.machine.state=='driving_regular_speed':
+            if (acc and acc==1):
+                self.machine.accelerate()
+
+        if self.machine.state=='driving_full_speed':
+            if (acc and acc==0):
+                self.machine.brake()
+
+        if self.machine.state=='driving_braking':
+                self.machine.drive()
 
         if mode != 'user' and lane!=None:
 
@@ -478,60 +508,24 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
             else:
                 requested_lane = self.cfg.DEFAULT_LANE_CENTER # default.
 
-            lanelogger.debug(f"LaneCtrl: lane predict:{self.LANE_LABEL[lane]}")
+            drivetrainlogger.debug(f"LaneCtrl: lane predict:{self.LANE_LABEL[lane]}")
 
-            if self.cfg.ROBOCARS_DRIVE_ON_TURN and turn!=None:
+            if self.cfg.ROBOCARS_THROTTLE_ON_ACC and acc!=None:
                 # Select lane based on turn prediction
-                lanelogger.debug(f"LaneCtrl : turn predict:{self.TURN_LABEL[turn]}/{turn}")
+                drivetrainlogger.debug(f"LaneCtrl : acceleration predict:{self.ACC_LABEL[acc]}/{acc}")
  
-                if not self.cfg.ROBOCARS_DRIVE_ON_TURN_BRAKE_ONLY: # Change lane based on turn prediction
-                    if turn == self.TURN_BRAKE_RIGHT_TURN: #next to turn on the right, switch on left lane
-                        requested_lane = self.LANE_LEFT         
-                    elif turn == self.TURN_RIGHT_TURN:  #inside turn on the right, keep on right lane
-                        requested_lane = self.LANE_RIGHT 
-                    elif turn == self.TURN_BRAKE_LEFT_TURN: #next to turn on the left, switch on right lane
-                        requested_lane = self.LANE_RIGHT
-                    elif turn == self.TURN_LEFT_TURN: #inside turn on the left, kepp on left lane
-                        requested_lane = self.LANE_LEFT
-                    else:
-                        requested_lane = self.LANE_CENTER
 
-                # Select throttle based on turn prediction
-                throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
-                if (turn==self.TURN_STRAIGHT_LINE):
-                    throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
-                    lanelogger.debug("LaneCtrl: Arm Brake")
-                    self.applyBrake=0
-
-                # If brake is armed, apply brake once when reaching turn 
-                if (turn==self.TURN_BRAKE_RIGHT_TURN or 
-                        turn==self.TURN_BRAKE_LEFT_TURN or
-                        turn==self.TURN_LEFT_TURN or
-                        turn==self.TURN_RIGHT_TURN):
-                    if self.applyBrake==0:
-                        lanelogger.debug("LaneCtrl: Trigger Brake")
-                        self.applyBrake=self.cfg.ROBOCARS_DRIVE_ON_TURN_BRAKE_DURATION #brake duration
-
-            if self.applyBrake>0:
-                lanelogger.debug(f"LaneCtrl: Brake cycle {self.applyBrake}")
-                throttle = self.cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
-                self.applyBrake-=1
-                # If break is done, disarm it.
-                if self.applyBrake==0:
-                    self.applyBrake=-1
-
-
-            lanelogger.debug(f"LaneCtrl     -> requested lane: {self.LANE_LABEL[requested_lane]}/{requested_lane}")      
+            drivetrainlogger.debug(f"LaneCtrl     -> requested lane: {self.LANE_LABEL[requested_lane]}/{requested_lane}")      
             # Adjust car steering to the reauested lane
             needed_adjustment = lane-requested_lane
-            lanelogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
+            drivetrainlogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
             needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
             if (needed_adjustment)>0:
                 needed_steering_adjustment = - needed_steering_adjustment
-            lanelogger.debug(f"LaneCtrl     -> adjust steering by {needed_steering_adjustment}")      
+            drivetrainlogger.debug(f"LaneCtrl     -> adjust steering by {needed_steering_adjustment}")      
             angle=bound(angle+needed_steering_adjustment,-1,1)
 
-            lanelogger.debug(f"LaneCtrl     -> enforce throttle: {throttle}")      
+            drivetrainlogger.debug(f"LaneCtrl     -> enforce throttle: {throttle}")      
 
         return throttle, angle
 
@@ -539,19 +533,19 @@ class RobocarsHatLaneCtrl(metaclass=Singleton):
         # not implemented
         pass
 
-    def run_threaded(self, throttle, angle, mode, lane, turn):
+    def run_threaded(self, throttle, angle, mode, lane, acc):
         # not implemented
         pass
 
-    def run (self,throttle, angle, mode, lane, turn):
-        throttle, angle = self.processLane (throttle, angle, mode, lane, turn)
+    def run (self,throttle, angle, mode, lane, acc):
+        throttle, angle = self.processLane (throttle, angle, mode, lane, acc)
         return throttle, angle
     
 
     def shutdown(self):
         # indicate that the thread should be stopped
         self.on = False
-        lanelogger.info('stopping RobocarsHatLaneCtrl Hat Controller')
+        drivlaneloggeretrainlogger.info('stopping RobocarsHatLaneCtrl Hat Controller')
         time.sleep(.5)
 
 

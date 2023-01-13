@@ -398,7 +398,7 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
             outputs.append("pilot/lane")
 
         if cfg.ROBOCARS_TURN_MODEL:
-            outputs.append("pilot/turn")
+            outputs.append("pilot/acc")
         #
         # Add image transformations like crop or trapezoidal mask
         #
@@ -432,7 +432,7 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
         V.add(ObstacleDetector(cfg.OBSTACLE_MIN_SCORE,
                                cfg.OBSTACLE_SHOW_BOUNDING_BOX),
               inputs=['cam/image_array'],
-              outputs=['cam/image_array', 'obstacle/label', 'obstacle/coords'])
+              outputs=['cam/image_array', 'obstacle/label'])
 
     #
     # to give the car a boost when starting ai mode in a race.
@@ -558,8 +558,8 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
     types += ['float', 'float']
 
     if cfg.OBSTACLE_DETECTOR:
-        inputs += ['obstacle/label', 'obstacle/coords']
-        types += ['str', 'str']
+        inputs += ['obstacle/label']
+        types += ['str']
 
 
     if cfg.HAVE_PERFMON:
@@ -580,10 +580,10 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
         inputs += ['pilot/lane']
         types += ['int']
 
-    if (cfg.ROBOCARS_TURN_MODEL):
-        inputs += ['user/turn']
+    if (cfg.ROBOCARS_ACC_MODEL):
+        inputs += ['user/acc']
         types += ['int']
-        inputs += ['pilot/turn']
+        inputs += ['pilot/acc']
         types += ['int']
 
     # do we want to store new records into own dir or append to existing
@@ -879,10 +879,10 @@ def add_imu(V, cfg):
 #
 def add_drivetrain(V, cfg):
 
-    if cfg.ROBOCARS_DRIVE_ON_LANE or cfg.ROBOCARS_DRIVE_ON_TURN :
-        from donkeycar.parts.robocars_hat_ctrl import RobocarsHatLaneCtrl
-        lane_controller = RobocarsHatLaneCtrl(cfg)
-        V.add(lane_controller, inputs=['throttle','angle','user/mode','pilot/lane', 'pilot/turn'], outputs=['throttle','angle'], threaded=False)
+    if cfg.USE_ROBOCARSHAT_POWERTRAIN_CONTROLLER :
+        from donkeycar.parts.robocars_hat_ctrl import RobocarsHatDriveCtrl
+        drive_controller = RobocarsHatDriveCtrl(cfg)
+        V.add(drive_controller, inputs=['throttle','angle','user/mode','pilot/lane', 'pilot/acc'], outputs=['throttle','angle'], threaded=False)
 
     if (not cfg.DONKEY_GYM) and cfg.DRIVE_TRAIN_TYPE != "MOCK":
         from donkeycar.parts import actuator, pins
