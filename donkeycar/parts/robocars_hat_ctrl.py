@@ -485,7 +485,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         self.lane = 0
         self.on = True
 
-        self.machine = HierarchicalMachine(self, states=self.states, transitions=self.transitions, initial='stopped', ignore_invalid_triggers=True)
+        self.machine = HierarchicalMachine(self, states=self.states, initial='stopped', ignore_invalid_triggers=True)
         self.machine.add_transition (trigger='drive', source='stopped', dest='driving', before='set_regularspeed')
         self.machine.add_transition (trigger='stop', source='driving', dest='stopped')
         self.machine.add_transition (trigger='accelerate', source='driving_regularspeed', dest='driving_fullspeed', before='set_fullspeed')
