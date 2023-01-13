@@ -491,11 +491,11 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
                 self.machine.stop()
 
         if self.machine.is_driving_regularspeed(allow_substates=True):
-            if (acc and acc==1):
+            if (acc!=None and acc==1):
                 self.machine.accelerate()
 
         if self.machine.is_driving_fullspeed(allow_substates=True):
-            if (acc and acc==0):
+            if (acc!=None and acc==0):
                 self.machine.brake()
 
         if self.machine.is_driving_braking(allow_substates=True):
