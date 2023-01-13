@@ -489,26 +489,26 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
 
     def processState(self, throttle, angle, mode, lane, acc):
 
-        if self.machine.is_stopped(allow_substates=True):
+        if self.is_stopped(allow_substates=True):
             if (mode != 'user') :
-                self.machine.drive()
+                self.drive()
 
-        if self.machine.is_driving(allow_substates=True):
+        if self.is_driving(allow_substates=True):
             if self.cfg.ROBOCARS_THROTTLE_ON_ACC:
                 throttle=self.fix_throttle
             if (mode == 'user') :
-                self.machine.stop()
+                self.stop()
 
-        if self.machine.is_driving_regularspeed(allow_substates=True):
+        if self.is_driving_regularspeed(allow_substates=True):
             if (acc!=None and acc==1) :
-                self.machine.accelerate()
+                self.accelerate()
 
-        if self.machine.is_driving_fullspeed(allow_substates=True):
+        if self.is_driving_fullspeed(allow_substates=True):
             if (acc!=None and acc==0):
-                self.machine.brake()
+                self.brake()
 
-        if self.machine.is_driving_braking(allow_substates=True):
-                self.machine.drive()
+        if self.is_driving_braking(allow_substates=True):
+                self.drive()
 
         return throttle, angle
  
