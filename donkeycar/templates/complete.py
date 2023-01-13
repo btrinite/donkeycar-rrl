@@ -429,11 +429,8 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
     if cfg.OBSTACLE_DETECTOR :
         from donkeycar.parts.object_detector.obstacle_detector \
             import ObstacleDetector
-        inputs=['cam/image_array']
-        if cfg.ACQUIRE_FULL_IMAGE_VGA:
-            inputs+=['cam/full_image_array']
         V.add(ObstacleDetector(cfg),
-              inputs=inputs,
+              inputs=['cam/image_array', 'cam/full_image_array'],
               outputs=['cam/image_array', 'obstacle/label'])
 
     #
