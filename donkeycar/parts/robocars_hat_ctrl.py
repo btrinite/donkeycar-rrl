@@ -511,6 +511,26 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
                 self.machine.drive()
 
         return throttle, angle
+ 
+    def update(self):
+        # not implemented
+        pass
+
+    def run_threaded(self, throttle, angle, mode, lane, acc):
+        # not implemented
+        pass
+
+    def run (self,throttle, angle, mode, lane, acc):
+        throttle, angle = self.processState (throttle, angle, mode, lane, acc)
+        return throttle, angle
+    
+
+    def shutdown(self):
+        # indicate that the thread should be stopped
+        self.on = False
+        drivetrainlogger.info('stopping RobocarsHatLaneCtrl Hat Controller')
+        time.sleep(.5)
+
 
 """         if mode != 'user' and lane!=None:
 
@@ -538,24 +558,3 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
 
             drivetrainlogger.debug(f"LaneCtrl     -> enforce throttle: {throttle}")      
  """
-
-    def update(self):
-        # not implemented
-        pass
-
-    def run_threaded(self, throttle, angle, mode, lane, acc):
-        # not implemented
-        pass
-
-    def run (self,throttle, angle, mode, lane, acc):
-        throttle, angle = self.processState (throttle, angle, mode, lane, acc)
-        return throttle, angle
-    
-
-    def shutdown(self):
-        # indicate that the thread should be stopped
-        self.on = False
-        drivetrainlogger.info('stopping RobocarsHatLaneCtrl Hat Controller')
-        time.sleep(.5)
-
-
