@@ -455,16 +455,16 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
     ACC_LABEL=["regular","stright line"]
 
     states = [
-            'stopped', 
+            {'name':'stopped'}, 
             {'name':'driving','children':['regular_speed', 'full_speed','braking']}
             ]
 
     transitions = [
-        ['trigger':'drive', 'source':'stopped', 'dest':'driving'],
-        ['trigger':'stop', 'source':'driving', 'dest':'stopped'],
-        ['trigger':'accelerate', 'source':['driving','driving_regular_speed'], 'dest':'driving_full_speed'],
-        ['trigger':'brake', 'source':['driving', 'driving_full_speed'], 'dest':'driving_braking'],
-        ['trigger':'drive', 'source':['driving', 'driving_braking'], 'dest':'driving_regular_speed'],
+        {'trigger':'drive', 'source':'stopped', 'dest':'driving'},
+        {'trigger':'stop', 'source':'driving', 'dest':'stopped'},
+        {'trigger':'accelerate', 'source':['driving','driving_regular_speed'], 'dest':'driving_full_speed'},
+        {'trigger':'brake', 'source':['driving', 'driving_full_speed'], 'dest':'driving_braking'},
+        {'trigger':'drive', 'source':['driving', 'driving_braking'], 'dest':'driving_regular_speed'},
         ]
 
     def __init__(self, cfg):
