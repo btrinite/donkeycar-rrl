@@ -459,12 +459,21 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
             {'name':'driving','initial':'regularspeed', 'children':['regularspeed', 'fullspeed','braking']}
             ]
 
+    def set_regularspeed():
+        self.fix_throttle = cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE
+
+    def set_fullspeed():
+        self.fix_throttle = cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_FS
+
+    def set_brakespeed():
+        self.fix_throttle = cfg.ROBOCARSHAT_LOCAL_ANGLE_FIX_THROTTLE_BRAKE
+
     transitions = [
-        {'trigger':'drive', 'source':'stopped', 'dest':'driving'},
+        {'trigger':'drive', 'source':'stopped', 'dest':'driving','before':set_regularspeed},
         {'trigger':'stop', 'source':'driving', 'dest':'stopped'},
-        {'trigger':'accelerate', 'source':['driving','driving_regularspeed'], 'dest':'driving_fullspeed'},
-        {'trigger':'brake', 'source':['driving', 'driving_fullspeed'], 'dest':'driving_braking'},
-        {'trigger':'drive', 'source':['driving', 'driving_braking'], 'dest':'driving_regularspeed'},
+        {'trigger':'accelerate', 'source':['driving','driving_regularspeed'], 'dest':'driving_fullspeed', 'before':set_fullspeed},
+        {'trigger':'brake', 'source':['driving', 'driving_fullspeed'], 'dest':'driving_braking', 'before':set_brakespeed},
+        {'trigger':'drive', 'source':['driving', 'driving_braking'], 'dest':'driving_regularspeed', 'before':set_regularspeed},
         ]
 
     def __init__(self, cfg):
@@ -472,14 +481,13 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         self.hatInCtrl = None
         if (self.cfg.USE_ROBOCARSHAT_AS_CONTROLLER):
             self.hatInCtrl = RobocarsHatInCtrl(self.cfg)
-        self.throttle = 0
-        self.steering = 0
+        self.fix_throttle = 0
         self.lane = 0
         self.on = True
         self.machine = HierarchicalMachine(states=self.states, transitions=self.transitions, initial='stopped', ignore_invalid_triggers=True)
         drivetrainlogger.info('starting RobocarsHatLaneCtrl Hat Controller')
 
-    def processLane(self, throttle, angle, mode, lane, acc):
+    def processState(self, throttle, angle, mode, lane, acc):
 
 
         if self.machine.is_stopped(allow_substates=True):
@@ -487,11 +495,13 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
                 self.machine.drive()
 
         if self.machine.is_driving(allow_substates=True):
+            if self.cfg.ROBOCARS_THROTTLE_ON_ACC:
+                throttle=self.fix_throttle
             if (mode == 'user') :
                 self.machine.stop()
 
         if self.machine.is_driving_regularspeed(allow_substates=True):
-            if (acc!=None and acc==1):
+            if (acc!=None and acc==1) :
                 self.machine.accelerate()
 
         if self.machine.is_driving_fullspeed(allow_substates=True):
@@ -501,7 +511,8 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         if self.machine.is_driving_braking(allow_substates=True):
                 self.machine.drive()
 
-        if mode != 'user' and lane!=None:
+
+"""         if mode != 'user' and lane!=None:
 
             if self.cfg.ROBOCARS_DRIVE_ON_LANE:
                 requested_lane = self.hatInCtrl.getRequestedLane() # Get Lane from RC
@@ -526,7 +537,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
             angle=bound(angle+needed_steering_adjustment,-1,1)
 
             drivetrainlogger.debug(f"LaneCtrl     -> enforce throttle: {throttle}")      
-
+ """
         return throttle, angle
 
     def update(self):
@@ -538,14 +549,14 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         pass
 
     def run (self,throttle, angle, mode, lane, acc):
-        throttle, angle = self.processLane (throttle, angle, mode, lane, acc)
+        throttle, angle = self.processState (throttle, angle, mode, lane, acc)
         return throttle, angle
     
 
     def shutdown(self):
         # indicate that the thread should be stopped
         self.on = False
-        drivlaneloggeretrainlogger.info('stopping RobocarsHatLaneCtrl Hat Controller')
+        drivetrainlogger.info('stopping RobocarsHatLaneCtrl Hat Controller')
         time.sleep(.5)
 
 
