@@ -12,6 +12,7 @@ import errno
 import sys
 import fcntl,os
 from transitions.extensions import HierarchicalMachine
+import queue
 
 mylogger = init_special_logger ("Rx")
 mylogger.setLevel(logging.INFO)
@@ -484,6 +485,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
             self.hatInCtrl = RobocarsHatInCtrl(self.cfg)
         self.fix_throttle = 0
         self.brake_cycle = 0
+        self.last_acc=queue.Queue(self.cfg.ROBOCARS_ACC_FILTER_SIZE)
         self.lane = 0
         self.on = True
 
@@ -496,24 +498,37 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
 
         drivetrainlogger.info('starting RobocarsHatLaneCtrl Hat Controller')
 
-    def processState(self, throttle, angle, mode, lane, acc):
+    def update_acc_filter (self,acc):
+        if (acc != None) :
+            self.last_acc.put(acc)
 
+    def is_acc_confition(self):
+        acc_arr = list(self.last_acc)
+        if sum(acc_arr) >= self.cfg.ROBOCARS_ACC_FILTER_TRESH_HIGH:
+            return True
+        if sum(acc_arr) <= self.cfg.ROBOCARS_ACC_FILTER_TRESH_LOW:
+            return True
+        return None
+
+    def processState(self, throttle, angle, mode, lane, acc):
+            
         if self.is_stopped(allow_substates=True):
             if (mode != 'user') :
                 self.drive()
 
         if self.is_driving(allow_substates=True):
+            self.update_acc_filter (acc)
             if self.cfg.ROBOCARS_THROTTLE_ON_ACC:
                 throttle=self.fix_throttle
             if (mode == 'user') :
                 self.stop()
 
         if self.is_driving_regularspeed(allow_substates=True):
-            if (acc!=None and acc==1) :
+            if (acc!=None and self.is_acc_confition()==True) :
                 self.accelerate()
 
         if self.is_driving_fullspeed(allow_substates=True):
-            if (acc!=None and acc==0):
+            if (acc!=None and self.is_acc_confition()==False):
                 self.brake()
 
         if self.is_driving_braking(allow_substates=True):

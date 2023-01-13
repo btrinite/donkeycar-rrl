@@ -574,6 +574,10 @@ ROBOCARS_LANE_STEERING_ADJUST_STEPS=[0,0.2,0.4]
 # Acceleration model
 ROBOCARS_ACC_MODEL=False
 ROBOCARS_NUM_ACC_CAT=2
+ROBOCARS_ACC_FILTER_SIZE=6
+ROBOCARS_ACC_FILTER_TRESH_HIGH=4
+ROBOCARS_ACC_FILTER_TRESH_LOW=2
+
 ROBOCARS_THROTTLE_ON_ACC=False
 ROBOCARS_THROTTLE_ON_ACC_REGULAR_SPEED = 0.2 # For pilot_angle autonomous mode, throttle for straight line parts 
 ROBOCARS_THROTTLE_ON_ACC_FULL_SPEED = 0.6 # For pilot_angle autonomous mode, throttle for straight line parts 
