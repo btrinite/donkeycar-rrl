@@ -127,14 +127,13 @@ class ObstacleDetector(object):
 
         # Detect traffic light object
         if full_img_arr is not None:
-            left_img, left_label = self.detect_obstacle(full_img_arr)
-            right_img, right_label = self.detect_obstacle(full_img_arr)
-            lanelogger.info(f" {left_label} <--- car ---> {right_label}")
-
-
+            img_for_detect = full_img_arr
         else :
-            left_img, right_label = self.detect_obstacle(img_arr)
-            right_img, right_label = self.detect_obstacle(img_arr)
+            img_for_detect = img_arr
+
+        left_img, right_label = self.detect_obstacle(img_for_detect)
+        right_img, right_label = self.detect_obstacle(img_for_detect)
+        lanelogger.info(f" {left_label} <--- car ---> {right_label}")
 
             
         return img_arr, "--" 
