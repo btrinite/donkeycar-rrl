@@ -167,11 +167,12 @@ class Webcam(BaseCamera):
         import pygame.image
         if self.cam.query_image():
             snapshot = self.cam.get_image()
-            if snapshot is not None:
+            if snapshot is not None:    
                 snapshot1 = pygame.transform.scale(snapshot, self.resolution)
                 self.frame = pygame.surfarray.pixels3d(pygame.transform.rotate(pygame.transform.flip(snapshot1, True, False), 90))
                 if (self.acquire_full_frame_vga):
-                    self.full_frame = pygame.surfarray.pixels3d(pygame.transform.rotate(pygame.transform.flip(snapshot, True, False), 90))
+                    snapshot2 = pygame.transform.scale(snapshot, self.capture_resolution)
+                    self.full_frame = pygame.surfarray.pixels3d(pygame.transform.rotate(pygame.transform.flip(snapshot2, True, False), 90))
                 if self.image_d == 1:
                     self.frame = rgb2gray(frame)
 
