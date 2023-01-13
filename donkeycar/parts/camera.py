@@ -102,6 +102,7 @@ class Webcam(BaseCamera):
         # initialize variable used to indicate
         # if the thread should be stopped
         self.frame = None
+        self.full_frame = None
         self.image_d = image_d
         self.image_w = image_w
         self.image_h = image_h
