@@ -431,7 +431,7 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
             import ObstacleDetector
         inputs=['cam/image_array']
         if cfg.ACQUIRE_FULL_IMAGE_VGA:
-            inputs+=['cam/full_image_array']]
+            inputs+=['cam/full_image_array']
         V.add(ObstacleDetector(cfg),
               inputs=inputs,
               outputs=['cam/image_array', 'obstacle/label'])
