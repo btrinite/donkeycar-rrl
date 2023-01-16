@@ -34,8 +34,8 @@ class ObstacleDetector(object):
         #https://raw.githubusercontent.com/google-coral/test_data/master/tf2_mobilenet_v3_edgetpu_1.0_224_ptq_edgetpu.tflite
         #https://raw.githubusercontent.com/google-coral/test_data/master/imagenet_labels.txt
 
-        MODEL_FILE_NAME = "edgetpu/tf2_mobilenet_v3_edgetpu_1.0_224_ptq_edgetpu.tflite"
-        LABEL_FILE_NAME = "edgetpu/imagenet_labels.txt"
+        MODEL_FILE_NAME = "edgetpu/mobilenet_track_v2_1.0_224_quant.tflite"
+        LABEL_FILE_NAME = "edgetpu/track_labels.txt"
 
         self.labels = read_label_file(LABEL_FILE_NAME)
 
