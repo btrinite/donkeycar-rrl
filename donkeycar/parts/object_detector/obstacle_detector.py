@@ -111,7 +111,7 @@ class ObstacleDetector(object):
 
         img = self.convertImageArrayToPILImage(img_arr)
         left_img = self.getRoiLeft (img)
-        right_img = self.getRoiLeft (img)
+        right_img = self.getRoiRight (img)
         obstacle_left = self.classify_img(left_img)
         obstacle_right = self.classify_img(right_img)
 
