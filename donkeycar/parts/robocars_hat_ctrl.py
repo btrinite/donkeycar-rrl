@@ -541,8 +541,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
 
         if self.is_driving(allow_substates=True):
             self.update_acc_filter (acc)
-            if self.cfg.ROBOCARS_THROTTLE_ON_ACC:
-                throttle=self.fix_throttle
+            throttle=self.fix_throttle
             if (mode == 'user') :
                 self.stop()
 
