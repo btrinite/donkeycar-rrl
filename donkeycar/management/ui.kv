@@ -10,7 +10,7 @@
 #:set layout_pad_xy [layout_pad_x, layout_pad_x // 2]
 #:set supported_models ['linear', 'categorical', 'inferred', 'memory', 'behavior', 'localizer', 'rnn', '3d']
 #:set drive_models [pre + t for pre in['', 'tflite_', 'tensorrt_'] for t in supported_models ]
-#:set labels ['car-ahead', 'no-car']
+#:set labels ['car-ahead-left','car-ahead-right', 'distant-car', 'no-car']
 
 <PaddedBoxLayout>:
     size_hint_y: None
