@@ -464,11 +464,19 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         self.fix_throttle = self.cfg.ROBOCARS_THROTTLE_ON_ACC_REGULAR_SPEED
 
     def set_fullspeed(self):
-        self.fix_throttle = self.cfg.ROBOCARS_THROTTLE_ON_ACC_FULL_SPEED
+        if self.cfg.ROBOCARS_THROTTLE_ON_ACC:
+            self.fix_throttle = self.cfg.ROBOCARS_THROTTLE_ON_ACC_FULL_SPEED
+        else:
+            self.fix_throttle = self.cfg.ROBOCARS_THROTTLE_ON_ACC_REGULAR_SPEED
 
     def set_brakespeed(self):
-        self.fix_throttle = self.cfg.ROBOCARS_THROTTLE_ON_ACC_BRAKE_SPEED
-        self.brake_cycle = self.cfg.ROBOCARS_THROTTLE_ON_ACC_BRAKE_DURATION
+        if self.cfg.ROBOCARS_THROTTLE_ON_ACC:
+            self.fix_throttle = self.cfg.ROBOCARS_THROTTLE_ON_ACC_BRAKE_SPEED
+            self.brake_cycle = self.cfg.ROBOCARS_THROTTLE_ON_ACC_BRAKE_DURATION
+        else:
+            self.fix_throttle = self.cfg.ROBOCARS_THROTTLE_ON_ACC_REGULAR_SPEED
+            self.brake_cycle = 0
+
 
     #transitions = [
     #    {'trigger':'drive', 'source':'stopped', 'dest':'driving','before':set_regularspeed},
@@ -498,6 +506,21 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
 
         drivetrainlogger.info('starting RobocarsHatLaneCtrl Hat Controller')
 
+    def avoid_obstacle (self, lane, obstacle_left, obstacle_right):
+        requested_lane = self.LANE_CENTER
+        if (len(obstacle_left)>0 and len(obstacle_right)==0):
+            requested_lane = self.LANE_RIGHT
+        if (len(obstacle_left)==0 and len(obstacle_right)>0):
+            requested_lane = self.LANE_LEFT
+        needed_adjustment = lane-requested_lane
+        drivetrainlogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
+        needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
+        if (needed_adjustment)>0:
+            needed_steering_adjustment = - needed_steering_adjustment
+        drivetrainlogger.debug(f"LaneCtrl     -> adjust steering by {needed_steering_adjustment}")      
+        angle=bound(angle+needed_steering_adjustment,-1,1)
+        return angle
+
     def update_acc_filter (self,acc):
         if (acc != None) :
             self.last_acc.append(acc)
@@ -511,7 +534,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
             return False
         return None
 
-    def processState(self, throttle, angle, mode, lane, acc):
+    def processState(self, throttle, angle, mode, lane, acc, obstacle_left, obstacle_right):
             
         if self.is_stopped(allow_substates=True):
             if (mode != 'user') :
@@ -538,18 +561,21 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
             else:
                 self.brake_cycle -=1
 
+        if self.cfg.OBSTACLE_DETECTOR:
+            angle = self.avoid_obstacle (lane, obstacle_left, obstacle_right)
+
         return throttle, angle
  
     def update(self):
         # not implemented
         pass
 
-    def run_threaded(self, throttle, angle, mode, lane, acc):
+    def run_threaded(self, throttle, angle, mode, lane, acc, obstacle_left, obstacle_right):
         # not implemented
         pass
 
-    def run (self,throttle, angle, mode, lane, acc):
-        throttle, angle = self.processState (throttle, angle, mode, lane, acc)
+    def run (self,throttle, angle, mode, lane, acc, obstacle_left, obstacle_right):
+        throttle, angle = self.processState (throttle, angle, mode, lane, acc, obstacle_left, obstacle_right)
         return throttle, angle
     
 
@@ -559,30 +585,3 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         drivetrainlogger.info('stopping RobocarsHatLaneCtrl Hat Controller')
         time.sleep(.5)
 
-
-"""         if mode != 'user' and lane!=None:
-
-            if self.cfg.ROBOCARS_DRIVE_ON_LANE:
-                requested_lane = self.hatInCtrl.getRequestedLane() # Get Lane from RC
-            else:
-                requested_lane = self.cfg.DEFAULT_LANE_CENTER # default.
-
-            drivetrainlogger.debug(f"LaneCtrl: lane predict:{self.LANE_LABEL[lane]}")
-
-            if self.cfg.ROBOCARS_THROTTLE_ON_ACC and acc!=None:
-                # Select lane based on turn prediction
-                drivetrainlogger.debug(f"LaneCtrl : acceleration predict:{self.ACC_LABEL[acc]}/{acc}")
- 
-
-            drivetrainlogger.debug(f"LaneCtrl     -> requested lane: {self.LANE_LABEL[requested_lane]}/{requested_lane}")      
-            # Adjust car steering to the reauested lane
-            needed_adjustment = lane-requested_lane
-            drivetrainlogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
-            needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
-            if (needed_adjustment)>0:
-                needed_steering_adjustment = - needed_steering_adjustment
-            drivetrainlogger.debug(f"LaneCtrl     -> adjust steering by {needed_steering_adjustment}")      
-            angle=bound(angle+needed_steering_adjustment,-1,1)
-
-            drivetrainlogger.debug(f"LaneCtrl     -> enforce throttle: {throttle}")      
- """

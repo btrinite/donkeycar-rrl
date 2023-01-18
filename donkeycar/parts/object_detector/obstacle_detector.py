@@ -115,14 +115,7 @@ class ObstacleDetector(object):
         obstacle_left = self.classify_img(left_img)
         obstacle_right = self.classify_img(right_img)
 
-        left_label = "---"
-        right_label = "---"
-        if obstacle_left:
-            left_label = f"{self.labels.get(obstacle_left.id, obstacle_left.id):<15} ({obstacle_left.score:.2f})"
-        if obstacle_right:
-            right_label = f"{self.labels.get(obstacle_right.id, obstacle_right.id):<15} ({obstacle_right.score:.2f})"
-
-        return left_label, right_label
+        return obstacle_left, obstacle_right
 
     def run(self, img_arr, full_img_arr):
         if img_arr is None:
@@ -134,8 +127,17 @@ class ObstacleDetector(object):
         else :
             img_for_detect = img_arr
 
-        left_label, right_label = self.detect_obstacle(img_for_detect)
-        lanelogger.info(f" {left_label} <--- car ---> {right_label}")
+        obstacle_left, obstacle_right = self.detect_obstacle(img_for_detect)
+
+        left_label = ""
+        right_label = ""
+
+        if obstacle_left:
+            left_label = f"{self.labels.get(obstacle_left.id, obstacle_left.id):<15} ({obstacle_left.score:.2f})"
+        if obstacle_right:
+            right_label = f"{self.labels.get(obstacle_right.id, obstacle_right.id):<15} ({obstacle_right.score:.2f})"
+
+        lanelogger.debug(f" {left_label} <--- car ---> {right_label}")
 
             
-        return img_arr, "--" 
+        return left_label, right_label

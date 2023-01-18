@@ -431,7 +431,7 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
             import ObstacleDetector
         V.add(ObstacleDetector(cfg),
               inputs=['cam/image_array', 'cam/full_image_array'],
-              outputs=['cam/image_array', 'obstacle/label'])
+              outputs=['obstacle/left', 'obstacle/left'])
 
     #
     # to give the car a boost when starting ai mode in a race.
@@ -557,8 +557,8 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
     types += ['float', 'float']
 
     if cfg.OBSTACLE_DETECTOR:
-        inputs += ['obstacle/label']
-        types += ['str']
+        inputs += ['obstacle/left', 'obstacle/right']
+        types += ['str', 'str']
 
 
     if cfg.HAVE_PERFMON:
