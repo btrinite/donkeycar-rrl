@@ -504,19 +504,20 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
 
         drivetrainlogger.info('starting RobocarsHatLaneCtrl Hat Controller')
 
-    def avoid_obstacle (self, lane, obstacle_left, obstacle_right):
+    def avoid_obstacle (self, angle, lane, obstacle_left, obstacle_right):
         requested_lane = self.LANE_CENTER
-        if (len(obstacle_left)>0 and len(obstacle_right)==0):
-            requested_lane = self.LANE_RIGHT
-        if (len(obstacle_left)==0 and len(obstacle_right)>0):
-            requested_lane = self.LANE_LEFT
-        needed_adjustment = lane-requested_lane
-        drivetrainlogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
-        needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
-        if (needed_adjustment)>0:
-            needed_steering_adjustment = - needed_steering_adjustment
-        drivetrainlogger.debug(f"LaneCtrl     -> adjust steering by {needed_steering_adjustment}")      
-        angle=bound(angle+needed_steering_adjustment,-1,1)
+        if lane != None:
+            if (len(obstacle_left)>0 and len(obstacle_right)==0):
+                requested_lane = self.LANE_RIGHT
+            if (len(obstacle_left)==0 and len(obstacle_right)>0):
+                requested_lane = self.LANE_LEFT
+            needed_adjustment = lane-requested_lane
+            drivetrainlogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
+            needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
+            if (needed_adjustment)>0:
+                needed_steering_adjustment = - needed_steering_adjustment
+            drivetrainlogger.debug(f"LaneCtrl     -> adjust steering by {needed_steering_adjustment}")      
+            angle=bound(angle+needed_steering_adjustment,-1,1)
         return angle
 
     def update_acc_filter (self,acc):
@@ -560,7 +561,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
                 self.brake_cycle -=1
 
         if self.cfg.OBSTACLE_DETECTOR:
-            angle = self.avoid_obstacle (lane, obstacle_left, obstacle_right)
+            angle = self.avoid_obstacle (lane, angle, obstacle_left, obstacle_right)
 
         return throttle, angle
  
