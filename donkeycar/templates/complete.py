@@ -431,7 +431,7 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
             import ObstacleDetector
         V.add(ObstacleDetector(cfg),
               inputs=['cam/image_array', 'cam/full_image_array'],
-              outputs=['obstacle/left', 'obstacle/right'])
+              outputs=['obstacle/left-label', 'obstacle/right-label', 'obstacle/left-img', 'obstacle/right-img'])
 
     #
     # to give the car a boost when starting ai mode in a race.
@@ -555,11 +555,16 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
 
     inputs += ['pilot/angle', 'pilot/throttle']
     types += ['float', 'float']
+    obstacle_inputs += ['pilot/angle', 'pilot/throttle']
+    obstacle_types += ['float', 'float']
 
     if cfg.OBSTACLE_DETECTOR:
-        inputs += ['obstacle/left', 'obstacle/right']
+        inputs += ['obstacle/left-label', 'obstacle/right-label']
         types += ['str', 'str']
-
+        obstacle_inputs += ['obstacle/left-label', 'obstacle/right-label']
+        obstacle_types += ['str', 'str']
+        obstacle_inputs += ['obstacle/left-img', 'obstacle/right-img']
+        obstacle_types += ['image_array', 'image_array']
 
     if cfg.HAVE_PERFMON:
         from donkeycar.parts.perfmon import PerfMonitor
@@ -578,12 +583,20 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
         types += ['int']
         inputs += ['pilot/lane']
         types += ['int']
+        obstacle_inputs += ['user/lane']
+        obstacle_types += ['int']
+        obstacle_inputs += ['pilot/lane']
+        obstacle_types += ['int']
 
     if (cfg.ROBOCARS_ACC_MODEL):
         inputs += ['user/acc']
         types += ['int']
         inputs += ['pilot/acc']
         types += ['int']
+        obstacle_inputs += ['user/acc']
+        obstacle_types += ['int']
+        obstacle_inputs += ['pilot/acc']
+        obstacle_types += ['int']
 
     # do we want to store new records into own dir or append to existing
     tub_path = TubHandler(path=cfg.DATA_PATH).create_tub_path() if \
@@ -591,6 +604,19 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
     meta += getattr(cfg, 'METADATA', [])
     tub_writer = TubWriter(tub_path, inputs=inputs, types=types, metadata=meta)
     V.add(tub_writer, inputs=inputs, outputs=["tub/num_records"], run_condition='recording')
+
+    obstacle_tub_path = TubHandler(path=cfg.OBSTACLE_DATA_PATH).create_tub_path() if \
+        cfg.AUTO_CREATE_NEW_TUB else cfg.OBSTACLE_DATA_PATH
+    obstacle_tub_writer = TubWriter(obstacle_tub_path, inputs=obstacle_inputs, types=obstacle_types, metadata=meta)
+    V.add(obstacle_tub_writer, inputs=obstacle_inputs, outputs=["tub/num_records"], run_condition='recording')
+
+    if cfg.ACQUIRE_FULL_IMAGE_VGA:
+        full_img_inputs += ['cam/full_image_array']
+        full_img_inputs += ['image_array']
+        full_img_tub_path = TubHandler(path=cfg.FULL_IMAGE_DATA_PATH).create_tub_path() if \
+            cfg.AUTO_CREATE_NEW_TUB else cfg.FULL_IMAGE_DATA_PATH
+        full_img_tub_writer = TubWriter(full_img_tub_path, inputs=full_img_inputs, types=full_img_types, metadata=meta)
+        V.add(full_img_tub_writer, inputs=full_img_inputs, outputs=["tub/num_records"], run_condition='recording')
 
     # Telemetry (we add the same metrics added to the TubHandler
     if cfg.HAVE_MQTT_TELEMETRY:
@@ -883,7 +909,7 @@ def add_drivetrain(V, cfg):
     if cfg.USE_ROBOCARSHAT_POWERTRAIN_CONTROLLER :
         from donkeycar.parts.robocars_hat_ctrl import RobocarsHatDriveCtrl
         drive_controller = RobocarsHatDriveCtrl(cfg)
-        V.add(drive_controller, inputs=['throttle','angle','user/mode','pilot/lane', 'pilot/acc', 'obstacle/left', 'obstacle/right'], outputs=['throttle','angle'], threaded=False)
+        V.add(drive_controller, inputs=['throttle','angle','user/mode','pilot/lane', 'pilot/acc', 'obstacle/left-label', 'obstacle/right-label'], outputs=['throttle','angle'], threaded=False)
 
     if (not cfg.DONKEY_GYM) and cfg.DRIVE_TRAIN_TYPE != "MOCK":
         from donkeycar.parts import actuator, pins

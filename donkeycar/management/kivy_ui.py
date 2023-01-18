@@ -410,13 +410,14 @@ class FullImage(Image):
             Logger.error(f'Record: Bad record: {e}')
 
     def process_image_analysis (self, image):
+        self.cfg = tub_screen().ids.config_manager.config
         height=image.shape[0]
         width=image.shape[1]
 
-        top = 0.20
-        bottom = 0.8
-        left=0.45
-        right=0.55
+        top = self.cfg.OBSTACLE_DETECTOR_ROI_TOP
+        bottom = self.cfg.OBSTACLE_DETECTOR_ROI_BOTTOM
+        left=self.cfg.OBSTACLE_DETECTOR_ROI_LEFT
+        right=self.cfg.OBSTACLE_DETECTOR_ROI_RIGHT
         b1x1=0
         b1y1=int(height*top)
         b1x2=int(width*right)
