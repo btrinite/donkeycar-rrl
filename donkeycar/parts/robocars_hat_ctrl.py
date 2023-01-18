@@ -511,7 +511,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
                 requested_lane = self.LANE_RIGHT
             if (len(obstacle_left)==0 and len(obstacle_right)>0):
                 requested_lane = self.LANE_LEFT
-            needed_adjustment = lane-requested_lane
+            needed_adjustment = int(lane-requested_lane)
             drivetrainlogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
             needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
             if (needed_adjustment)>0:
@@ -561,7 +561,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
                 self.brake_cycle -=1
 
         if self.cfg.OBSTACLE_DETECTOR:
-            angle = self.avoid_obstacle (lane, angle, obstacle_left, obstacle_right)
+            angle = self.avoid_obstacle (angle, lane, obstacle_left, obstacle_right)
 
         return throttle, angle
  
