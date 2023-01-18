@@ -431,7 +431,7 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
             import ObstacleDetector
         V.add(ObstacleDetector(cfg),
               inputs=['cam/image_array', 'cam/full_image_array'],
-              outputs=['obstacle/left', 'obstacle/left'])
+              outputs=['obstacle/left', 'obstacle/right'])
 
     #
     # to give the car a boost when starting ai mode in a race.
@@ -883,7 +883,7 @@ def add_drivetrain(V, cfg):
     if cfg.USE_ROBOCARSHAT_POWERTRAIN_CONTROLLER :
         from donkeycar.parts.robocars_hat_ctrl import RobocarsHatDriveCtrl
         drive_controller = RobocarsHatDriveCtrl(cfg)
-        V.add(drive_controller, inputs=['throttle','angle','user/mode','pilot/lane', 'pilot/acc', 'obstacle/left', 'obstacle/left'], outputs=['throttle','angle'], threaded=False)
+        V.add(drive_controller, inputs=['throttle','angle','user/mode','pilot/lane', 'pilot/acc', 'obstacle/left', 'obstacle/right'], outputs=['throttle','angle'], threaded=False)
 
     if (not cfg.DONKEY_GYM) and cfg.DRIVE_TRAIN_TYPE != "MOCK":
         from donkeycar.parts import actuator, pins
