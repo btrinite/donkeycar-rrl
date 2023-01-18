@@ -121,9 +121,9 @@ class ObstacleDetector(object):
         left_label = "---"
         right_label = "---"
         if obstacle_left:
-            left_label = f"{self.labels.get(obstacle_left.id, obstacle_left.id)} ({obstacle_left.score})"
+            left_label = f"{self.labels.get(obstacle_left.id, obstacle_left.id):<15} ({obstacle_left.score:.2f})"
         if obstacle_right:
-            right_label = f"{self.labels.get(obstacle_right.id, obstacle_right.id)} ({obstacle_right.score})"
+            right_label = f"{self.labels.get(obstacle_right.id, obstacle_right.id):<15} ({obstacle_right.score:.2f})"
 
         return left_label, right_label
 

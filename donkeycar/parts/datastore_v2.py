@@ -304,7 +304,10 @@ class Manifest(object):
             record_indexes = {record_indexes}
         if (label not in self.labeled_indexes.keys()):
             self.labeled_indexes[label]=set()
-        self.labeled_indexes[label].update(record_indexes)
+        to_reset = self.labeled_indexes[label].intersection(record_indexes)
+        to_set = set(record_indexes) - self.labeled_indexes[label]
+        self.labeled_indexes[label].difference_update(to_reset)
+        self.labeled_indexes[label].update(to_set)
         self._update_catalog_metadata(update=True)
         
     def restore_records(self, record_indexes):
