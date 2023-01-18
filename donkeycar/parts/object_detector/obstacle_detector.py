@@ -27,6 +27,8 @@ class ObstacleDetector(object):
     We are just using a pre-trained model (MobileNet V2 SSD) provided by Google.
     '''
 
+    CAR_AHEAD_CLASS_ID = 0
+
     def __init__(self, cfg, debug=False):
 
         #MODEL_URL = "https://github.com/google-coral/edgetpu/raw/master/test_data/ssd_mobilenet_v2_coco_quant_postprocess_edgetpu.tflite"
@@ -94,16 +96,11 @@ class ObstacleDetector(object):
         
         classes = classify.get_classes(self.interpreter, top_k=3, score_threshold=self.min_score)
 
-        max_score = 0
         obstacle_obj = None
         if classes:
             for obj in classes:
-                    if (obj.score > max_score):
-                        obstacle_obj = obj
-                        max_score = obj.score
-
-        if obstacle_obj and self.debug:
-            print(f"object {self.labels.get(obstacle_obj.id, obstacle_obj.id)} detected, score = {obstacle_obj.score}")
+                if obj.id == self.CAR_AHEAD_CLASS_ID:
+                    obstacle_obj = obj
 
         return obstacle_obj
 
