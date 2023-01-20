@@ -50,8 +50,6 @@ class ObstacleDetector(object):
 
         self.size = common.input_size(self.interpreter)
 
-        self.last_5_scores = collections.deque(np.zeros(5), maxlen=5)
-
         self.cfg = cfg          
         self.min_score = self.cfg.OBSTACLE_MIN_SCORE
         self.show_bounding_box = self.cfg.OBSTACLE_SHOW_BOUNDING_BOX
