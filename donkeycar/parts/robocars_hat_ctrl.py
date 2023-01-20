@@ -506,15 +506,15 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         drivetrainlogger.info('starting RobocarsHatLaneCtrl Hat Controller')
 
     def avoid_obstacle (self, angle, lane, obstacle_left, obstacle_right):
-        requested_lane = self.requested_lane
         if lane != None:
+            new_requested_lane = self.requested_lane
             if (len(obstacle_left)>0 and len(obstacle_right)==0):
-                requested_lane = self.LANE_RIGHT
+                new_requested_lane = self.LANE_RIGHT
             if (len(obstacle_left)==0 and len(obstacle_right)>0):
-                requested_lane = self.LANE_LEFT
-            if (requested_lane != self.requested_lane):
-                drivetrainlogger.info(f"Change lane to {self.LANE_LABEL[self.requested_lane]}")
-
+                new_requested_lane = self.LANE_LEFT
+            if (new_requested_lane != self.requested_lane):
+                drivetrainlogger.info(f"Change lane to {self.LANE_LABEL[self.new_requested_lane]}")
+                self.requested_lane = requested_lane
             needed_adjustment = int(lane-self.requested_lane)
             drivetrainlogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
             needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
