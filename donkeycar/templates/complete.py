@@ -583,20 +583,22 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
         types += ['int']
         inputs += ['pilot/lane']
         types += ['int']
-        obstacle_inputs += ['user/lane']
-        obstacle_types += ['int']
-        obstacle_inputs += ['pilot/lane']
-        obstacle_types += ['int']
+        if cfg.OBSTACLE_DETECTOR :
+            obstacle_inputs += ['user/lane']
+            obstacle_types += ['int']
+            obstacle_inputs += ['pilot/lane']
+            obstacle_types += ['int']
 
     if (cfg.ROBOCARS_ACC_MODEL):
         inputs += ['user/acc']
         types += ['int']
         inputs += ['pilot/acc']
         types += ['int']
-        obstacle_inputs += ['user/acc']
-        obstacle_types += ['int']
-        obstacle_inputs += ['pilot/acc']
-        obstacle_types += ['int']
+        if cfg.OBSTACLE_DETECTOR :
+            obstacle_inputs += ['user/acc']
+            obstacle_types += ['int']
+            obstacle_inputs += ['pilot/acc']
+            obstacle_types += ['int']
 
     # do we want to store new records into own dir or append to existing
     tub_path = TubHandler(path=cfg.DATA_PATH).create_tub_path() if \
@@ -605,10 +607,11 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
     tub_writer = TubWriter(tub_path, inputs=inputs, types=types, metadata=meta)
     V.add(tub_writer, inputs=inputs, outputs=["tub/num_records"], run_condition='recording')
 
-    obstacle_tub_path = TubHandler(path=cfg.OBSTACLE_DATA_PATH).create_tub_path() if \
-        cfg.AUTO_CREATE_NEW_TUB else cfg.OBSTACLE_DATA_PATH
-    obstacle_tub_writer = TubWriter(obstacle_tub_path, inputs=obstacle_inputs, types=obstacle_types, metadata=meta)
-    V.add(obstacle_tub_writer, inputs=obstacle_inputs, outputs=["tub/num_records"], run_condition='recording')
+    if cfg.OBSTACLE_DETECTOR :
+        obstacle_tub_path = TubHandler(path=cfg.OBSTACLE_DATA_PATH).create_tub_path() if \
+            cfg.AUTO_CREATE_NEW_TUB else cfg.OBSTACLE_DATA_PATH
+        obstacle_tub_writer = TubWriter(obstacle_tub_path, inputs=obstacle_inputs, types=obstacle_types, metadata=meta)
+        V.add(obstacle_tub_writer, inputs=obstacle_inputs, outputs=["tub/num_records"], run_condition='recording')
 
     if cfg.ACQUIRE_FULL_IMAGE_VGA:
         full_img_inputs = ['cam/full_image_array']
