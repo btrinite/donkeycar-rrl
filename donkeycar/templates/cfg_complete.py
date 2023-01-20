@@ -18,7 +18,7 @@ import os
 #PATHS
 CAR_PATH = PACKAGE_PATH = os.path.dirname(os.path.realpath(__file__))
 DATA_PATH = os.path.join(CAR_PATH, 'data')
-OBSTACLE_DATA_PATH = os.path.join(CAR_PATH, 'obstacle_data')
+OBSTACLE_DATA_PATH = os.path.join(CAR_PATH, 'data_obstacle')
 FULL_IMAGE_DATA_PATH = os.path.join(CAR_PATH, 'full_img_data')
 MODELS_PATH = os.path.join(CAR_PATH, 'models')
 
