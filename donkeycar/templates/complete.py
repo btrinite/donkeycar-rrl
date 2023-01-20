@@ -612,7 +612,7 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
 
     if cfg.ACQUIRE_FULL_IMAGE_VGA:
         full_img_inputs = ['cam/full_image_array']
-        full_img_inputs = ['image_array']
+        full_img_types = ['image_array']
         full_img_tub_path = TubHandler(path=cfg.FULL_IMAGE_DATA_PATH).create_tub_path() if \
             cfg.AUTO_CREATE_NEW_TUB else cfg.FULL_IMAGE_DATA_PATH
         full_img_tub_writer = TubWriter(full_img_tub_path, inputs=full_img_inputs, types=full_img_types, metadata=meta)
