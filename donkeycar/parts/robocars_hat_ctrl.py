@@ -494,6 +494,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         self.last_acc=deque(maxlen=self.cfg.ROBOCARS_ACC_FILTER_SIZE)
         self.lane = 0
         self.on = True
+        self.requested_lane = self.LANE_CENTER
 
         self.machine = HierarchicalMachine(self, states=self.states, initial='stopped', ignore_invalid_triggers=True)
         self.machine.add_transition (trigger='drive', source='stopped', dest='driving', before='set_regularspeed')
@@ -505,13 +506,12 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         drivetrainlogger.info('starting RobocarsHatLaneCtrl Hat Controller')
 
     def avoid_obstacle (self, angle, lane, obstacle_left, obstacle_right):
-        requested_lane = self.LANE_CENTER
         if lane != None:
             if (len(obstacle_left)>0 and len(obstacle_right)==0):
-                requested_lane = self.LANE_RIGHT
+                self.requested_lane = self.LANE_RIGHT
             if (len(obstacle_left)==0 and len(obstacle_right)>0):
-                requested_lane = self.LANE_LEFT
-            needed_adjustment = int(lane-requested_lane)
+                self.requested_lane = self.LANE_LEFT
+            needed_adjustment = int(lane-self.requested_lane)
             drivetrainlogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
             needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
             if (needed_adjustment)>0:
