@@ -513,7 +513,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
             if (len(obstacle_left)==0 and len(obstacle_right)>0):
                 new_requested_lane = self.LANE_LEFT
             if (new_requested_lane != self.requested_lane):
-                drivetrainlogger.info(f"Change lane to {self.LANE_LABEL[self.new_requested_lane]}")
+                drivetrainlogger.info(f"Change lane to {self.LANE_LABEL[new_requested_lane]}")
                 self.requested_lane = requested_lane
             needed_adjustment = int(lane-self.requested_lane)
             drivetrainlogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
