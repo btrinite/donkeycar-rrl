@@ -514,7 +514,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
                 new_requested_lane = self.LANE_LEFT
             if (new_requested_lane != self.requested_lane):
                 drivetrainlogger.info(f"Change lane to {self.LANE_LABEL[new_requested_lane]}")
-                self.requested_lane = requested_lane
+                self.requested_lane = new_requested_lane
             needed_adjustment = int(lane-self.requested_lane)
             drivetrainlogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
             needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
