@@ -562,6 +562,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         if self.cfg.OBSTACLE_DETECTOR:
             angle = self.avoid_obstacle (angle, lane, obstacle_left, obstacle_right)
 
+        drivetrainlogger.info(f"Driving on {LANE_LABEL[self.requested_lane]}")
         return throttle, angle
  
     def update(self):
