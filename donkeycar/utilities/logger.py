@@ -27,9 +27,9 @@ def init_special_logger(namespace):
     _logger = logging.getLogger(namespace)
     _logger.setLevel(logging.DEBUG)
     sh = logging.StreamHandler()
+    sh.setFormatter(CustomFormatter())
     _logger.addHandler(sh)
     #formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s:%(message)s')
-    sh.setFormatter(CustomFormatter())
     _logger.propagate = False
     return _logger
 
