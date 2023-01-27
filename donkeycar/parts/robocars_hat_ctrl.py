@@ -494,7 +494,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         self.last_acc=deque(maxlen=self.cfg.ROBOCARS_ACC_FILTER_SIZE)
         self.lane = 0
         self.on = True
-        self.requested_lane = self.LANE_CENTER
+        self.requested_lane = self.cfg.DEFAULT_LANE_CENTER
 
         self.machine = HierarchicalMachine(self, states=self.states, initial='stopped', ignore_invalid_triggers=True)
         self.machine.add_transition (trigger='drive', source='stopped', dest='driving', before='set_regularspeed')
@@ -504,6 +504,16 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         self.machine.add_transition (trigger='drive', source='driving_braking', dest='driving_regularspeed', before='set_regularspeed')
 
         drivetrainlogger.info('starting RobocarsHatLaneCtrl Hat Controller')
+
+    def adjust_steering_to_lane(self, angle, lane, requested_lane):
+        needed_adjustment = int(lane-requested_lane)
+        drivetrainlogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
+        needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
+        if (needed_adjustment)>0:
+            needed_steering_adjustment = - needed_steering_adjustment
+        drivetrainlogger.debug(f"LaneCtrl     -> adjust steering by {needed_steering_adjustment}")      
+        angle=bound(angle+needed_steering_adjustment,-1,1)
+        return angle
 
     def avoid_obstacle (self, angle, lane, obstacle_left, obstacle_right):
         if lane != None:
@@ -515,15 +525,10 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
             if (new_requested_lane != self.requested_lane):
                 drivetrainlogger.info(f"Change lane to {self.LANE_LABEL[new_requested_lane]}")
                 self.requested_lane = new_requested_lane
-            needed_adjustment = int(lane-self.requested_lane)
-            drivetrainlogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
-            needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
-            if (needed_adjustment)>0:
-                needed_steering_adjustment = - needed_steering_adjustment
-            drivetrainlogger.debug(f"LaneCtrl     -> adjust steering by {needed_steering_adjustment}")      
-            angle=bound(angle+needed_steering_adjustment,-1,1)
+            angle = self.adjust_steering_to_lane (angle, lane, self.requested_lane)
         return angle
 
+        
     def update_acc_filter (self,acc):
         if (acc != None) :
             self.last_acc.append(acc)
@@ -565,6 +570,9 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
 
         if self.cfg.OBSTACLE_DETECTOR:
             angle = self.avoid_obstacle (angle, lane, obstacle_left, obstacle_right)
+        elif self.cfg.ROBOCARS_DRIVE_ON_LANE:
+            self.requested_lane = self.hatInCtrl.getRequestedLane()
+            angle = self.drive_on_lane (angle, lane, self.requested_lane)
 
         return throttle, angle
  
