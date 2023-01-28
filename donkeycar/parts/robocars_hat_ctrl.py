@@ -506,6 +506,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         drivetrainlogger.info('starting RobocarsHatLaneCtrl Hat Controller')
 
     def adjust_steering_to_lane(self, angle, lane, requested_lane):
+        drivetrainlogger.debug(f"Change lane from {self.LANE_LABEL[lane]} to {self.LANE_LABEL[requested_lane]}")    
         needed_adjustment = int(lane-requested_lane)
         drivetrainlogger.debug(f"LaneCtrl     -> adjust needed {needed_adjustment}")      
         needed_steering_adjustment = self.cfg.ROBOCARS_LANE_STEERING_ADJUST_STEPS[abs(needed_adjustment)]
@@ -523,7 +524,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
             if (len(obstacle_left)==0 and len(obstacle_right)>0):
                 new_requested_lane = self.LANE_LEFT
             if (new_requested_lane != self.requested_lane):
-                drivetrainlogger.info(f"Change lane to {self.LANE_LABEL[new_requested_lane]}")
+                drivetrainlogger.info(f"Change lane from {self.LANE_LABEL[lane]} to {self.LANE_LABEL[new_requested_lane]}")
                 self.requested_lane = new_requested_lane
             angle = self.adjust_steering_to_lane (angle, lane, self.requested_lane)
         return angle
@@ -555,7 +556,7 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
                 angle = self.avoid_obstacle (angle, lane, obstacle_left, obstacle_right)
             elif self.cfg.ROBOCARS_DRIVE_ON_LANE:
                 self.requested_lane = self.hatInCtrl.getRequestedLane()
-                angle = self.drive_on_lane (angle, lane, self.requested_lane)
+                angle = self.adjust_steering_to_lane (angle, lane, self.requested_lane)
             if (mode == 'user') :
                 self.stop()
 
