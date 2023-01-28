@@ -551,6 +551,11 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
         if self.is_driving(allow_substates=True):
             self.update_acc_filter (acc)
             throttle=self.fix_throttle
+            if self.cfg.OBSTACLE_DETECTOR:
+                angle = self.avoid_obstacle (angle, lane, obstacle_left, obstacle_right)
+            elif self.cfg.ROBOCARS_DRIVE_ON_LANE:
+                self.requested_lane = self.hatInCtrl.getRequestedLane()
+                angle = self.drive_on_lane (angle, lane, self.requested_lane)
             if (mode == 'user') :
                 self.stop()
 
@@ -568,11 +573,6 @@ class RobocarsHatDriveCtrl(metaclass=Singleton):
             else:
                 self.brake_cycle -=1
 
-        if self.cfg.OBSTACLE_DETECTOR:
-            angle = self.avoid_obstacle (angle, lane, obstacle_left, obstacle_right)
-        elif self.cfg.ROBOCARS_DRIVE_ON_LANE:
-            self.requested_lane = self.hatInCtrl.getRequestedLane()
-            angle = self.drive_on_lane (angle, lane, self.requested_lane)
 
         return throttle, angle
  
